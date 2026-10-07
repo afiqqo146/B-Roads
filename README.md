@@ -44,7 +44,24 @@ cp .env.example .env.local   # set EXPO_PUBLIC_API_URL to your computer's LAN IP
 npx expo run:ios             # or: npx expo run:android
 ```
 
-The app uses native modules that Expo Go doesn't include (`react-native-share`, `react-native-purchases`), so run it as a **development build** (`npx expo run:*` locally, or `npx eas-cli build --profile development`).
+### Quick live test with Expo Go
+
+Everything except direct Instagram/Facebook posting and real payments works in [Expo Go](https://expo.dev/go), so you don't need a build to test routing and group drives:
+
+```bash
+cd app
+echo "EXPO_PUBLIC_API_URL=https://your-server-url" > .env.local
+npx expo start --tunnel      # everyone scans the QR code with Expo Go
+```
+
+For a real drive on mobile data, the server needs a public URL: deploy `server/` (e.g. Render, Railway, Fly.io) or expose your laptop with `cloudflared tunnel --url http://localhost:4000`. In Expo Go:
+
+- the paywall shows a **dev unlock** switch instead of real purchases
+- pit stop photos open the system share sheet (Instagram and Facebook are listed there) instead of jumping straight into Instagram Stories
+
+### Development build
+
+For one-tap Instagram/Facebook sharing and real payments, run a **development build** (`npx expo run:ios` locally, or `npx eas-cli build --profile development`). These features use native modules (`react-native-share`, `react-native-purchases`) that Expo Go doesn't include.
 
 ## How the B-road routing works
 
