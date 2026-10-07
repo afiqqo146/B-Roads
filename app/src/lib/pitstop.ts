@@ -1,8 +1,8 @@
 import * as Clipboard from 'expo-clipboard';
 import * as Location from 'expo-location';
 import * as MediaLibrary from 'expo-media-library';
+import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
-import Share, { Social } from 'react-native-share';
 import { META_APP_ID } from './config';
 
 export type ShareTarget = 'instagram-story' | 'instagram-post' | 'facebook' | 'more';
@@ -36,6 +36,25 @@ export async function saveToPhotos(uri: string) {
 const asFileUrl = (uri: string) => (uri.startsWith('file://') ? uri : `file://${uri}`);
 
 /**
+ * react-native-share needs native code that Expo Go doesn't ship, and it throws
+ * as soon as it's imported. Expo Router imports every screen at startup, so we
+ * only load it when the user actually shares. Returns null in Expo Go.
+ */
+async function loadShareModule() {
+  try {
+    return await import('react-native-share');
+  } catch {
+    return null;
+  }
+}
+
+/** System share sheet from expo-sharing, which works everywhere incl. Expo Go. */
+async function openSystemSheet(url: string) {
+  if (!(await Sharing.isAvailableAsync())) throw new Error('Sharing is not available on this device.');
+  await Sharing.shareAsync(url, { mimeType: 'image/jpeg', UTI: 'public.jpeg' });
+}
+
+/**
  * Instagram and Facebook don't accept pre-filled captions from other apps, so
  * we copy the caption first and the user pastes it. Returns a hint to show.
  */
@@ -43,6 +62,14 @@ export async function sharePhoto(target: ShareTarget, uri: string, caption: stri
   const url = asFileUrl(uri);
   await Clipboard.setStringAsync(caption);
   const pasteHint = 'Caption copied - paste it into your post.';
+
+  const mod = await loadShareModule();
+  if (!mod) {
+    // Expo Go: no direct Instagram/Facebook hand-off, but the share sheet lists them.
+    await openSystemSheet(url);
+    return pasteHint;
+  }
+  const { default: Share, Social } = mod;
 
   try {
     switch (target) {
