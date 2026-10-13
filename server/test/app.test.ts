@@ -79,7 +79,8 @@ describe('server', () => {
     guest.emit('drive:position', { lat: 3.4002, lng: 101.8001 });
     const drive = await finished;
     expect(drive.results).toHaveLength(2);
-    expect(drive.results!.every((r) => r.elapsedMs !== null && r.rank !== null)).toBe(true);
+    expect(drive.results!.every((r) => r.elapsedMs !== null)).toBe(true);
+    expect(drive.results![0]).not.toHaveProperty('rank');
 
     const snapshot = await (await fetch(`${base}/api/drives/${drive.code}`)).json();
     expect(snapshot.status).toBe('finished');

@@ -341,18 +341,13 @@ export class DriveStore {
   }
 }
 
+/**
+ * Each driver's own time, listed by name. Deliberately not ranked: B-Roads is
+ * for enjoying the drive together, not racing on public roads.
+ */
 export function computeResults(drive: Drive): DriveResult[] {
   const startedAt = drive.startedAt ?? drive.createdAt;
-  const rows = drive.members.map((m) => ({
-    memberId: m.id,
-    name: m.name,
-    elapsedMs: m.arrivedAt ? m.arrivedAt - startedAt : null,
-  }));
-  rows.sort((a, b) => {
-    if (a.elapsedMs === null) return b.elapsedMs === null ? a.name.localeCompare(b.name) : 1;
-    if (b.elapsedMs === null) return -1;
-    return a.elapsedMs - b.elapsedMs;
-  });
-  let rank = 0;
-  return rows.map((r) => ({ ...r, rank: r.elapsedMs === null ? null : ++rank }));
+  return drive.members
+    .map((m) => ({ memberId: m.id, name: m.name, elapsedMs: m.arrivedAt ? m.arrivedAt - startedAt : null }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }

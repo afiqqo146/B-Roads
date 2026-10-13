@@ -5,7 +5,7 @@
 | | Feature | Where |
 |---|---|---|
 | 1 | **B-road routing**: pick a start and destination; B-Roads avoids motorways, trunk roads and tolls, then ranks the alternatives by how twisty they are | `server/src/scenic.ts`, `app/src/app/index.tsx` |
-| 2 | **Group drives**: the host creates a drive and shares a 6-character code. Everyone sees each other live on the map, the clock starts when the host starts the drive, and each driver's time stops when they arrive. A results board appears once everyone is in | `server/src/drives.ts`, `app/src/app/drive/[code].tsx` |
+| 2 | **Group drives**: the host creates a drive and shares a 6-character code. Everyone sees each other live on the map, the clock starts when the host starts the drive, and each driver's time stops when they arrive. When everyone is in, the drive summary shows the group's time and each driver's own time. Drivers aren't ranked, so it doesn't turn into a race on public roads | `server/src/drives.ts`, `app/src/app/drive/[code].tsx` |
 | 3 | **Pit stop photos**: snap a photo, stamp it with your location and drive stats, and share it to an Instagram Story, Instagram post or Facebook in one tap | `app/src/app/pitstop.tsx`, `app/src/lib/pitstop.ts` |
 | 4 | **Clubs (Premium)**: club events with sign-ups; convoy tools (lead car, back-marker, regroup points, falling-behind alerts); a shared route library; club drive history | `server/src/clubs.ts`, `app/src/app/club/` |
 
@@ -82,7 +82,7 @@ The **Relaxed / Balanced / Wild** setting changes how hard highways are penalise
 
 - Live state goes over Socket.IO (`shared/types.ts` defines the event contract). Every phone streams its GPS position, and the server broadcasts the drive to everyone in it.
 - **Arrival** happens when a driver gets within 150 m of the destination (`ARRIVAL_RADIUS_M`). The server timestamps it, so phone clocks don't matter.
-- **Finish** happens when every driver has arrived. The host can also *End for all*, and anyone not there yet is marked DNF. If a driver leaves mid-drive, the group no longer waits for them.
+- **Finish** happens when every driver has arrived. The host can also *End for all*, and anyone not there yet is shown as "Didn't finish". Results are listed by name with no ranking or medals, because B-Roads is for driving together, not racing on public roads. If a driver leaves mid-drive, the group no longer waits for them.
 - If a phone reconnects (tunnel, dead zone), it rejoins with the same member ID and keeps its place.
 - **Drive solo** works the same way as a one-person group drive, so solo runs are timed too.
 - Drives live in memory and are cleared 24 h after their last activity. For production, swap `DriveStore` for Redis or Postgres and run more than one instance behind the Socket.IO Redis adapter.

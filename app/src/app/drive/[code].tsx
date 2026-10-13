@@ -337,18 +337,22 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+/** Drive summary: the group's time and each driver's own time. No ranking. */
 function Results({ drive, myId }: { drive: Drive; myId?: string }) {
-  const medals = ['🥇', '🥈', '🥉'];
+  const groupMs = drive.startedAt && drive.finishedAt ? drive.finishedAt - drive.startedAt : null;
   return (
     <View style={{ gap: 6 }}>
-      <Text style={ui.h2}>🏁 Results</Text>
+      <Text style={ui.h2}>🏁 Drive complete</Text>
+      {groupMs != null && drive.members.length > 1 && (
+        <Text style={ui.body}>Group time: {formatDuration(groupMs)}</Text>
+      )}
       {(drive.results ?? []).map((r) => (
         <View key={r.memberId} style={s.resultRow}>
-          <Text style={s.resultRank}>{r.rank ? (medals[r.rank - 1] ?? `${r.rank}.`) : '—'}</Text>
           <Text style={[s.resultName, r.memberId === myId && { color: colors.accent }]} numberOfLines={1}>
             {r.name}
+            {r.memberId === myId ? ' (you)' : ''}
           </Text>
-          <Text style={s.resultTime}>{r.elapsedMs != null ? formatDuration(r.elapsedMs) : 'DNF'}</Text>
+          <Text style={s.resultTime}>{r.elapsedMs != null ? formatDuration(r.elapsedMs) : "Didn't finish"}</Text>
         </View>
       ))}
       <Text style={ui.muted}>
@@ -391,7 +395,6 @@ const s = StyleSheet.create({
   statValue: { color: colors.text, fontSize: 20, fontWeight: '800', fontVariant: ['tabular-nums'] },
   actions: { flexDirection: 'row', gap: 10, paddingBottom: 8 },
   resultRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
-  resultRank: { width: 32, fontSize: 20, color: colors.text, textAlign: 'center' },
   resultName: { flex: 1, color: colors.text, fontSize: 16, fontWeight: '700' },
   resultTime: { color: colors.text, fontSize: 16, fontWeight: '700', fontVariant: ['tabular-nums'] },
 });

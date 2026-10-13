@@ -93,7 +93,6 @@ export interface DriveResult {
   name: string;
   /** Null when the member did not finish before the drive was ended. */
   elapsedMs: number | null;
-  rank: number | null;
 }
 
 export interface Drive {

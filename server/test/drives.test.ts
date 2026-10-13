@@ -74,9 +74,10 @@ describe('DriveStore', () => {
     t += 5 * 60_000;
     drive = store.updatePosition('ABC234', 'm1', nearGoal);
     expect(drive.status).toBe('finished');
+    // Listed by name with each driver's own time - no ranking.
     expect(drive.results).toEqual([
-      { memberId: farah, name: 'Farah', elapsedMs: 40 * 60_000, rank: 1 },
-      { memberId: 'm1', name: 'Aiman', elapsedMs: 45 * 60_000, rank: 2 },
+      { memberId: 'm1', name: 'Aiman', elapsedMs: 45 * 60_000 },
+      { memberId: farah, name: 'Farah', elapsedMs: 40 * 60_000 },
     ]);
   });
 
@@ -89,7 +90,7 @@ describe('DriveStore', () => {
     expect(drive.members[0].arrivedAt).toBe(t); // already parked at the destination
   });
 
-  it('lets the host end early, leaving stragglers unranked', () => {
+  it('lets the host end early, leaving stragglers without a time', () => {
     store.create(payload);
     const farah = store.join('ABC234', 'Farah').memberId;
     store.start('ABC234', 'm1');
@@ -98,8 +99,8 @@ describe('DriveStore', () => {
     expect(() => store.end('ABC234', farah)).toThrow(/host/);
     const drive = store.end('ABC234', 'm1');
     expect(drive.status).toBe('finished');
-    expect(drive.results!.map((r) => [r.name, r.rank])).toEqual([
-      ['Aiman', 1],
+    expect(drive.results!.map((r) => [r.name, r.elapsedMs])).toEqual([
+      ['Aiman', 60_000],
       ['Farah', null],
     ]);
   });
