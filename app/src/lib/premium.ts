@@ -34,6 +34,12 @@ export async function buy(pkg: PurchasesPackage): Promise<boolean> {
   return hasPremium(customerInfo);
 }
 
+/** RevenueCat's ID for this customer; the server uses it to verify Premium. */
+export async function getAppUserId(): Promise<string | undefined> {
+  if (!billingEnabled) return undefined;
+  return Purchases.getAppUserID().catch(() => undefined);
+}
+
 export async function restore(): Promise<boolean> {
   return hasPremium(await Purchases.restorePurchases());
 }

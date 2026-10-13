@@ -1,16 +1,23 @@
 import { randomInt, randomUUID } from 'node:crypto';
 import type {
+  ConvoyRole,
   CreateDrivePayload,
   Drive,
   DriveMember,
   DriveResult,
   JoinedDrive,
+  LatLng,
   PositionPayload,
 } from '../../shared/types.ts';
 import { distanceM } from './geo.ts';
 
 /** A member counts as arrived once they're this close to the destination. */
 export const ARRIVAL_RADIUS_M = 150;
+/** Club drives: alert when a car drops this far behind the front of the convoy. */
+export const CONVOY_GAP_M = 2000;
+/** A car has reached a regroup point within this distance. */
+export const REGROUP_RADIUS_M = 150;
+const MAX_REGROUP_POINTS = 10;
 /** Drives are forgotten this long after they were last touched. */
 export const DRIVE_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -23,7 +30,13 @@ interface Options {
   now?: () => number;
   newId?: () => string;
   newCode?: () => string;
+  /** Called once when a drive finishes, e.g. to save it to club history. */
+  onFinish?: (drive: Drive) => void;
 }
+
+export type CreateOptions = Omit<CreateDrivePayload, 'club'> & {
+  club?: { id: string; name: string; eventId?: string };
+};
 
 const randomCode = () =>
   Array.from({ length: CODE_LENGTH }, () => CODE_ALPHABET[randomInt(CODE_ALPHABET.length)]).join('');
@@ -38,21 +51,25 @@ const cleanName = (name: string) => {
 export class DriveStore {
   private drives = new Map<string, Drive>();
   private touchedAt = new Map<string, number>();
+  /** Cumulative metres along each drive's route path, for convoy progress. */
+  private pathDistances = new Map<string, number[]>();
   private now: () => number;
   private newId: () => string;
   private newCode: () => string;
+  private onFinish?: (drive: Drive) => void;
 
   constructor(opts: Options = {}) {
     this.now = opts.now ?? Date.now;
     this.newId = opts.newId ?? randomUUID;
     this.newCode = opts.newCode ?? randomCode;
+    this.onFinish = opts.onFinish;
   }
 
   get(code: string): Drive | undefined {
     return this.drives.get(code.trim().toUpperCase());
   }
 
-  create(p: CreateDrivePayload): JoinedDrive {
+  create(p: CreateOptions): JoinedDrive {
     if (!p.route?.path?.length) throw new DriveError('A route is required to start a drive');
     let code = this.newCode();
     while (this.drives.has(code)) code = this.newCode();
@@ -68,6 +85,8 @@ export class DriveStore {
       status: 'lobby',
       createdAt: this.now(),
       members: [host],
+      club: p.club,
+      regroupPoints: [],
     };
     this.drives.set(code, drive);
     this.touch(code);
@@ -118,7 +137,9 @@ export class DriveStore {
     };
     member.distanceToGoalM = Math.round(distanceM(member.position, drive.destination.location));
     if (drive.status === 'driving') {
+      member.progressM = Math.round(this.progressAlong(drive, member.position));
       this.checkArrival(drive, member);
+      if (drive.club) this.updateConvoy(drive, member);
       this.maybeFinish(drive);
     }
     this.touch(drive.code);
@@ -132,6 +153,41 @@ export class DriveStore {
     if (drive.status === 'finished') return drive;
     if (drive.status === 'lobby') drive.startedAt = this.now();
     this.finish(drive);
+    return drive;
+  }
+
+  /** Club drives: the host names the lead car and the back-marker (sweep). */
+  setConvoyRole(code: string, hostId: string, memberId: string, role: ConvoyRole | null): Drive {
+    const drive = this.requireClubHost(code, hostId);
+    const member = this.requireMember(drive, memberId);
+    if (role !== null && role !== 'lead' && role !== 'sweep') throw new DriveError('Unknown convoy role');
+    // One lead and one sweep at a time.
+    if (role) for (const m of drive.members) if (m.convoyRole === role) delete m.convoyRole;
+    if (role) member.convoyRole = role;
+    else delete member.convoyRole;
+    if (drive.status === 'driving') this.updateConvoy(drive);
+    this.touch(drive.code);
+    return drive;
+  }
+
+  addRegroupPoint(code: string, hostId: string, name: string, location: LatLng): Drive {
+    const drive = this.requireClubHost(code, hostId);
+    if (!Number.isFinite(location?.lat) || !Number.isFinite(location?.lng)) throw new DriveError('Invalid location');
+    if (drive.regroupPoints.length >= MAX_REGROUP_POINTS) throw new DriveError('That is the maximum number of regroup points');
+    drive.regroupPoints.push({
+      id: this.newId(),
+      name: String(name ?? '').trim().slice(0, 40) || `Regroup ${drive.regroupPoints.length + 1}`,
+      location: { lat: location.lat, lng: location.lng },
+      reachedBy: [],
+    });
+    this.touch(drive.code);
+    return drive;
+  }
+
+  removeRegroupPoint(code: string, hostId: string, id: string): Drive {
+    const drive = this.requireClubHost(code, hostId);
+    drive.regroupPoints = drive.regroupPoints.filter((p) => p.id !== id);
+    this.touch(drive.code);
     return drive;
   }
 
@@ -156,12 +212,14 @@ export class DriveStore {
     if (drive.members.length === 0) {
       this.drives.delete(drive.code);
       this.touchedAt.delete(drive.code);
+      this.pathDistances.delete(drive.code);
       return undefined;
     }
     if (drive.hostId === memberId) {
       drive.hostId = drive.members[0].id;
       drive.members[0].isHost = true;
     }
+    if (drive.club && drive.status === 'driving') this.updateConvoy(drive);
     this.maybeFinish(drive);
     this.touch(drive.code);
     return drive;
@@ -175,6 +233,7 @@ export class DriveStore {
       if (at < cutoff) {
         this.drives.delete(code);
         this.touchedAt.delete(code);
+        this.pathDistances.delete(code);
         removed++;
       }
     }
@@ -196,7 +255,60 @@ export class DriveStore {
     drive.status = 'finished';
     drive.finishedAt = this.now();
     drive.results = computeResults(drive);
+    for (const m of drive.members) delete m.fallingBehind;
     this.touch(drive.code);
+    try {
+      this.onFinish?.(drive);
+    } catch (err) {
+      console.error('onFinish failed', err);
+    }
+  }
+
+  /** Metres along the planned route to the path point nearest `pos`. */
+  private progressAlong(drive: Drive, pos: LatLng): number {
+    const path = drive.route.path;
+    let cumulative = this.pathDistances.get(drive.code);
+    if (!cumulative) {
+      cumulative = [0];
+      for (let i = 1; i < path.length; i++) cumulative.push(cumulative[i - 1] + distanceM(path[i - 1], path[i]));
+      this.pathDistances.set(drive.code, cumulative);
+    }
+    let best = 0;
+    let bestD = Infinity;
+    for (let i = 0; i < path.length; i++) {
+      const d = distanceM(pos, path[i]);
+      if (d < bestD) {
+        bestD = d;
+        best = i;
+      }
+    }
+    return cumulative[best];
+  }
+
+  /**
+   * Works out each car's gap to the front of the convoy - the lead car if one
+   * is set, otherwise whoever is furthest along - and ticks off regroup points.
+   */
+  private updateConvoy(drive: Drive, moved?: DriveMember) {
+    if (moved?.position) {
+      for (const point of drive.regroupPoints) {
+        if (!point.reachedBy.includes(moved.id) && distanceM(moved.position, point.location) <= REGROUP_RADIUS_M) {
+          point.reachedBy.push(moved.id);
+        }
+      }
+    }
+    const onRoad = drive.members.filter((m) => !m.arrivedAt && m.progressM !== undefined);
+    const lead = onRoad.find((m) => m.convoyRole === 'lead');
+    const front = lead?.progressM ?? Math.max(0, ...onRoad.map((m) => m.progressM!));
+    for (const m of drive.members) {
+      if (m.arrivedAt || m.progressM === undefined) {
+        delete m.behindM;
+        delete m.fallingBehind;
+        continue;
+      }
+      m.behindM = Math.max(0, Math.round(front - m.progressM));
+      m.fallingBehind = m.behindM > CONVOY_GAP_M;
+    }
   }
 
   private touch(code: string) {
@@ -213,6 +325,14 @@ export class DriveStore {
     const member = drive.members.find((m) => m.id === memberId);
     if (!member) throw new DriveError('You are not part of this drive');
     return member;
+  }
+
+  private requireClubHost(code: string, hostId: string): Drive {
+    const drive = this.require(code);
+    this.requireHost(drive, hostId);
+    if (!drive.club) throw new DriveError('Convoy tools are available on club drives (Premium)');
+    if (drive.status === 'finished') throw new DriveError('This drive has finished');
+    return drive;
   }
 
   private requireHost(drive: Drive, memberId: string) {

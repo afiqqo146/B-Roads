@@ -7,10 +7,12 @@ import { useAppState } from '../context/AppState';
 import { billingEnabled, buy, getPremiumPackages, restore } from '../lib/premium';
 import { colors } from '../lib/theme';
 
+// Premium is for club organisers. Members join clubs and drives for free.
 const PERKS = [
-  ['📸', 'Pit stop camera', 'Snap a photo at every stop, stamped with where you are and how long you have been driving.'],
-  ['📲', 'One-tap posting', 'Straight to your Instagram Story, Instagram feed or Facebook.'],
-  ['🏁', 'Drive stats on the photo', 'Your drive name, time on the road and distance to go on every shot.'],
+  ['📅', 'Club events and sign-ups', 'Plan drives with a date, meeting point and route. Members reply going, maybe or can\'t make it.'],
+  ['🚗', 'Convoy tools', 'Name a lead car and a back-marker, set regroup points, and get an alert when a car falls behind.'],
+  ['🗺️', 'Route library', 'Save the club\'s best tested roads so anyone can drive them again.'],
+  ['🏁', 'Club drive history', 'Every club drive is logged with who came, the route and how long it took.'],
 ] as const;
 
 export default function PremiumScreen() {
@@ -52,7 +54,7 @@ export default function PremiumScreen() {
         </View>
       ))}
 
-      {premium && <Text style={[ui.body, { color: colors.good }]}>{"You're a Premium driver. Enjoy the stops!"}</Text>}
+      {premium && <Text style={[ui.body, { color: colors.good }]}>{"You're on Premium. Start or run your club from the Club screen."}</Text>}
 
       {billingEnabled ? (
         <>

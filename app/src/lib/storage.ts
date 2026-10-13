@@ -21,5 +21,6 @@ export async function save(key: string, value: string | null): Promise<void> {
 export const keys = {
   driverName: 'driverName',
   devPremium: 'devPremium',
+  clubSession: 'clubSession',
   memberId: (code: string) => `drive:${code}:memberId`,
 };

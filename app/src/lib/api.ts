@@ -1,7 +1,7 @@
 import type { Drive, LatLng, Place, ScenicRoute } from '../../../shared/types';
 import { API_URL } from './config';
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}`, {

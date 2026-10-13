@@ -1,12 +1,13 @@
 # B-Roads
 
-**Waze for car clubs, minus the motorways.** B-Roads plans routes along back roads (B-roads) instead of highways, runs live group drives that time everyone from A to B, and lets Premium drivers post pit-stop photos straight to Instagram or Facebook.
+**Waze for car clubs, minus the motorways.** B-Roads plans routes along back roads (B-roads) instead of highways, runs live group drives that time everyone from A to B, and lets drivers post pit-stop photos straight to Instagram or Facebook. **Premium** is for club organisers: events with sign-ups, convoy tools, a route library and club drive history.
 
 | | Feature | Where |
 |---|---|---|
 | 1 | **B-road routing**: pick a start and destination; B-Roads avoids motorways, trunk roads and tolls, then ranks the alternatives by how twisty they are | `server/src/scenic.ts`, `app/src/app/index.tsx` |
 | 2 | **Group drives**: the host creates a drive and shares a 6-character code. Everyone sees each other live on the map, the clock starts when the host starts the drive, and each driver's time stops when they arrive. A results board appears once everyone is in | `server/src/drives.ts`, `app/src/app/drive/[code].tsx` |
-| 3 | **Pit stop photos (Premium)**: snap a photo, stamp it with your location and drive stats, and share it to an Instagram Story, Instagram post or Facebook in one tap | `app/src/app/pitstop.tsx`, `app/src/lib/pitstop.ts` |
+| 3 | **Pit stop photos**: snap a photo, stamp it with your location and drive stats, and share it to an Instagram Story, Instagram post or Facebook in one tap | `app/src/app/pitstop.tsx`, `app/src/lib/pitstop.ts` |
+| 4 | **Clubs (Premium)**: club events with sign-ups; convoy tools (lead car, back-marker, regroup points, falling-behind alerts); a shared route library; club drive history | `server/src/clubs.ts`, `app/src/app/club/` |
 
 ## Layout
 
@@ -34,6 +35,8 @@ Environment variables (optional):
 | `PORT` | `4000` | |
 | `VALHALLA_URL` | `https://valhalla1.openstreetmap.de` | Valhalla routing engine |
 | `PHOTON_URL` | `https://photon.komoot.io` | Place search (OpenStreetMap) |
+| `DATA_DIR` | `data` | Where clubs are saved (`clubs.json`) |
+| `REVENUECAT_SECRET_KEY` | unset | When set, creating a club requires an active `premium` entitlement. Unset allows everyone (development) |
 
 **App**
 
@@ -84,12 +87,23 @@ The **Relaxed / Balanced / Wild** setting changes how hard highways are penalise
 - **Drive solo** works the same way as a one-person group drive, so solo runs are timed too.
 - Drives live in memory and are cleared 24 h after their last activity. For production, swap `DriveStore` for Redis or Postgres and run more than one instance behind the Socket.IO Redis adapter.
 
-## Premium: pit stop photos
+## Premium: club organiser tools
+
+Joining a club, and every club feature a member uses, is free. Premium is what an organiser pays for to **create and run a club**.
+
+- **Club events and sign-ups**: organisers post a drive with a date, meeting point and a route from the library. Members reply *Going*, *Maybe* or *Can't*. On the day, an organiser taps **Start drive** and members get a **Join the live drive** button on the event.
+- **Convoy tools** (on club drives): the host taps a driver to make them **lead car** or **back-marker**, and long-presses the map to drop **regroup points**. Everyone sees how many cars have reached each point. Each car's progress along the route is measured. When a car falls more than 2 km (`CONVOY_GAP_M`) behind the lead car, or behind the front car if there's no lead, everyone sees an alert, and the host, lead and back-marker phones vibrate.
+- **Route library**: organisers save a planned route to the club with notes. Any member can open it and drive it.
+- **Club drive history**: finished club drives are saved with the route, distance, group time and who took part.
+- Roles: the club **owner** (the person who created it) can make members **organisers**. Organisers manage events and routes and start club drives.
+- There are no accounts. Joining a club gives the phone a secret token, which it sends with every request (`x-club-token`). Clubs are saved to `DATA_DIR/clubs.json`. For production, move them to a database.
+- **Billing** goes through [RevenueCat](https://www.revenuecat.com/), which wraps App Store and Google Play subscriptions. Set up an entitlement called `premium`, attach your products to the current offering, and set `EXPO_PUBLIC_REVENUECAT_IOS_KEY` / `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` in the app and `REVENUECAT_SECRET_KEY` on the server. Without keys, the paywall shows a **dev unlock** switch for testing. Premium is checked when a club is created. Pausing a club when the owner's subscription lapses isn't built yet.
+
+## Pit stop photos
 
 - The photo is stamped with the place name (reverse-geocoded on the phone), the drive name, time on the road and distance to go. The stamped image is what gets shared.
 - **Instagram Story** uses Meta's official Stories sharing intent and needs a Meta App ID (`EXPO_PUBLIC_META_APP_ID`). **Instagram post** and **Facebook** open the app's composer with the photo attached.
 - Instagram and Facebook don't let other apps pre-fill captions, so B-Roads copies a caption (📍 place, drive name, hashtags) to the clipboard for the driver to paste.
-- **Billing** goes through [RevenueCat](https://www.revenuecat.com/), which wraps App Store and Google Play subscriptions. Set up an entitlement called `premium`, attach your products to the current offering, and set `EXPO_PUBLIC_REVENUECAT_IOS_KEY` / `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`. Without keys, the paywall shows a **dev unlock** switch for testing.
 
 ## Keys you'll need before shipping
 
@@ -97,11 +111,12 @@ The **Relaxed / Balanced / Wild** setting changes how hard highways are penalise
 |---|---|
 | `GOOGLE_MAPS_ANDROID_API_KEY` | Map tiles on Android (iOS uses Apple Maps) |
 | `EXPO_PUBLIC_META_APP_ID` | Instagram/Facebook Stories sharing |
-| `EXPO_PUBLIC_REVENUECAT_*_KEY` | Premium subscription |
+| `EXPO_PUBLIC_REVENUECAT_*_KEY` | Premium subscription (app) |
+| `REVENUECAT_SECRET_KEY` | Checking Premium before a club is created (server) |
 | `EXPO_PUBLIC_API_URL` | Your deployed B-Roads server |
 
 ## Not built yet
 
 - **Background location**: tracking currently runs while the app is open (the screen is kept awake during a drive). To keep timing drivers while they use other apps, add `expo-task-manager` with background location permission.
 - **Spoken turn-by-turn directions**: the drive screen shows the next manoeuvre and an off-route warning, but there's no voice guidance or automatic rerouting yet.
-- **Accounts**: drivers are identified by name per drive, and there's no login or persistent club or history yet.
+- **Accounts**: there's no login. A club membership lives on the phone (its token), so a member who switches phones rejoins with the invite code.

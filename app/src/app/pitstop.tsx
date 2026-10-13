@@ -1,12 +1,11 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
 import type { Drive } from '../../../shared/types';
 import { Button, ErrorText, styles as ui } from '../components/ui';
-import { useAppState } from '../context/AppState';
 import { useLocation } from '../hooks/useLocation';
 import { getDrive } from '../lib/api';
 import { formatDistance, formatDuration } from '../lib/format';
@@ -14,9 +13,8 @@ import { buildCaption, describeLocation, saveToPhotos, sharePhoto, type ShareTar
 import { keys, load } from '../lib/storage';
 import { colors, radius } from '../lib/theme';
 
-/** Premium: snap a photo at a pit stop, stamp it with where you are, share it. */
+/** Snap a photo at a pit stop, stamp it with where you are, share it. */
 export default function PitStopScreen() {
-  const { premium } = useAppState();
   const { code } = useLocalSearchParams<{ code?: string }>();
   const [permission, requestPermission] = useCameraPermissions();
   const { fix } = useLocation();
@@ -35,8 +33,6 @@ export default function PitStopScreen() {
   useEffect(() => {
     if (code) load(keys.memberId(code)).then(setMemberId);
   }, [code]);
-
-  if (!premium) return <Redirect href="/premium" />;
 
   if (!permission) return <View style={ui.screen} />;
   if (!permission.granted) {

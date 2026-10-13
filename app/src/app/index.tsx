@@ -7,6 +7,7 @@ import { MY_LOCATION_NAME, PlaceSearch } from '../components/PlaceSearch';
 import { RouteCard } from '../components/RouteCard';
 import { Button, ErrorText } from '../components/ui';
 import { useAppState } from '../context/AppState';
+import { useClub } from '../context/ClubState';
 import { useLocation } from '../hooks/useLocation';
 import { findRoutes } from '../lib/api';
 import { toMapCoord } from '../lib/geo';
@@ -20,6 +21,7 @@ const ADVENTURE = [
 
 export default function PlanScreen() {
   const app = useAppState();
+  const { club, isOrganiser } = useClub();
   const { start, setStart, destination, setDestination, routes, setRoutes, selectedRouteId, setSelectedRouteId } = app;
   const { fix, error: locationError } = useLocation();
   const [adventure, setAdventure] = useState<number>(0.7);
@@ -107,6 +109,9 @@ export default function PlanScreen() {
             <Pressable style={s.chip} onPress={() => router.push('/join')}>
               <Text style={s.chipText}>Join drive</Text>
             </Pressable>
+            <Pressable style={s.chip} onPress={() => router.push('/club')}>
+              <Text style={s.chipText}>Club</Text>
+            </Pressable>
             <Pressable style={s.chip} onPress={() => router.push('/settings')} accessibilityLabel="Settings">
               <Text style={s.chipText}>☰</Text>
             </Pressable>
@@ -162,6 +167,17 @@ export default function PlanScreen() {
               <RouteCard key={r.id} route={r} best={i === 0} selected={r.id === selectedRouteId} onPress={() => setSelectedRouteId(r.id)} />
             ))}
           </ScrollView>
+          {club && isOrganiser && selected && (
+            <View style={s.actions}>
+              <Button
+                title={`Save to ${club.name}`}
+                icon="🗺️"
+                variant="secondary"
+                style={{ flex: 1 }}
+                onPress={() => router.push('/club/save-route')}
+              />
+            </View>
+          )}
           <View style={s.actions}>
             <Button
               title="Drive solo"

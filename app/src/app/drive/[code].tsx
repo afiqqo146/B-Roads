@@ -1,10 +1,10 @@
 import { useKeepAwake } from 'expo-keep-awake';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, Vibration, View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { Drive } from '../../../../shared/types';
+import type { ConvoyRole, Drive, DriveMember } from '../../../../shared/types';
 import { MemberRow, memberColor } from '../../components/MemberRow';
 import { Button, ErrorText, styles as ui } from '../../components/ui';
 import { useAppState } from '../../context/AppState';
@@ -34,10 +34,15 @@ function useNow(running: boolean) {
 
 export default function DriveScreen() {
   const { code } = useLocalSearchParams<{ code: string }>();
-  const { driverName, premium } = useAppState();
+  const { driverName } = useAppState();
   const { fix, error: locationError } = useLocation(true, true);
-  const { drive, me, isHost, connected, error, start, end, leave } = useDrive(code, driverName, fix);
+  const { drive, me, isHost, connected, error, start, end, leave, setConvoyRole, addRegroup, removeRegroup } = useDrive(
+    code,
+    driverName,
+    fix,
+  );
   const [busy, setBusy] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const map = useRef<MapView>(null);
   const now = useNow(drive?.status === 'driving');
@@ -99,7 +104,36 @@ export default function DriveScreen() {
       message: `Join my B-Roads drive "${drive?.name}" to ${drive?.destination.name}! Code: ${code}\nbroads://join?code=${code}`,
     });
 
-  const pitStop = () => router.push(premium ? { pathname: '/pitstop', params: { code } } : '/premium');
+  const pitStop = () => router.push({ pathname: '/pitstop', params: { code } });
+
+  // ---- Convoy tools (club drives) ----
+  const convoy = !!drive?.club && drive.status !== 'finished';
+  const canManageConvoy = convoy && isHost;
+  const behind = drive?.members.filter((m) => m.fallingBehind && m.id !== me?.id) ?? [];
+
+  // Buzz the people looking after the convoy when a car newly drops back.
+  const alerted = useRef(new Set<string>());
+  const behindKey = behind.map((m) => m.id).join(',');
+  useEffect(() => {
+    const ids = behindKey ? behindKey.split(',') : [];
+    const fresh = ids.filter((id) => !alerted.current.has(id));
+    alerted.current = new Set(ids);
+    if (fresh.length && (isHost || me?.convoyRole)) Vibration.vibrate(400);
+  }, [behindKey, isHost, me?.convoyRole]);
+
+  const onMapLongPress = (coordinate: { latitude: number; longitude: number }) => {
+    if (!canManageConvoy || !drive) return;
+    const name = `Regroup ${drive.regroupPoints.length + 1}`;
+    Alert.alert('Add a regroup point here?', 'Everyone will see it on their map, with a count of cars that have reached it.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Add', onPress: () => run(() => addRegroup(name, { lat: coordinate.latitude, lng: coordinate.longitude })) },
+    ]);
+  };
+
+  const assignRole = (member: DriveMember, role: ConvoyRole | null) => {
+    setSelectedMember(null);
+    void run(() => setConvoyRole(member.id, role));
+  };
 
   if (!drive) {
     return (
@@ -117,7 +151,14 @@ export default function DriveScreen() {
   return (
     <View style={ui.screen}>
       {drive.status === 'driving' && <KeepAwake />}
-      <MapView ref={map} style={StyleSheet.absoluteFill} showsUserLocation userInterfaceStyle="dark" showsCompass={false}>
+      <MapView
+        ref={map}
+        style={StyleSheet.absoluteFill}
+        showsUserLocation
+        userInterfaceStyle="dark"
+        showsCompass={false}
+        onLongPress={(e) => onMapLongPress(e.nativeEvent.coordinate)}
+      >
         <Polyline coordinates={drive.route.path.map(toMapCoord)} strokeColor={colors.accent} strokeWidth={6} />
         <Marker coordinate={toMapCoord(drive.destination.location)} title={drive.destination.name} />
         {drive.members
@@ -131,6 +172,22 @@ export default function DriveScreen() {
               description={m.distanceToGoalM != null ? `${formatDistance(m.distanceToGoalM)} to go` : undefined}
             />
           ))}
+        {drive.regroupPoints.map((p) => (
+          <Marker
+            key={p.id}
+            coordinate={toMapCoord(p.location)}
+            title={`🚩 ${p.name}`}
+            description={canManageConvoy ? 'Tap here to remove' : `${p.reachedBy.length}/${drive.members.length} cars here`}
+            pinColor={colors.premium}
+            onCalloutPress={() =>
+              canManageConvoy &&
+              Alert.alert(`Remove ${p.name}?`, undefined, [
+                { text: 'Keep', style: 'cancel' },
+                { text: 'Remove', style: 'destructive', onPress: () => run(() => removeRegroup(p.id)) },
+              ])
+            }
+          />
+        ))}
       </MapView>
 
       <SafeAreaView edges={['top']} style={s.top} pointerEvents="box-none">
@@ -150,6 +207,14 @@ export default function DriveScreen() {
           )}
         </View>
         {guidance && <GuidanceBanner {...guidance} />}
+        {behind.length > 0 && (
+          <View style={s.alert}>
+            <Text style={s.alertText}>
+              ⚠ {behind.map((m) => `${m.name} (${formatDistance(m.behindM ?? 0)})`).join(', ')}{' '}
+              {behind.length === 1 ? 'is' : 'are'} falling behind
+            </Text>
+          </View>
+        )}
       </SafeAreaView>
 
       <SafeAreaView edges={['bottom']} style={s.sheet}>
@@ -166,6 +231,11 @@ export default function DriveScreen() {
               <Text style={ui.muted}>
                 {isHost ? 'Start when everyone is at the meeting point.' : 'Waiting for the host to start the drive…'}
               </Text>
+              {canManageConvoy && (
+                <Text style={[ui.muted, { color: colors.premium }]}>
+                  Convoy tools: tap a driver to make them lead car or back-marker. Long-press the map to add regroup points.
+                </Text>
+              )}
             </>
           )}
 
@@ -182,7 +252,32 @@ export default function DriveScreen() {
           ) : (
             <View>
               {drive.members.map((m) => (
-                <MemberRow key={m.id} drive={drive} member={m} isMe={m.id === me?.id} />
+                <View key={m.id}>
+                  <Pressable
+                    disabled={!canManageConvoy}
+                    onPress={() => setSelectedMember(selectedMember === m.id ? null : m.id)}
+                  >
+                    <MemberRow drive={drive} member={m} isMe={m.id === me?.id} />
+                  </Pressable>
+                  {canManageConvoy && selectedMember === m.id && (
+                    <View style={s.roleRow}>
+                      <RoleChip label="Lead car" on={m.convoyRole === 'lead'} onPress={() => assignRole(m, 'lead')} />
+                      <RoleChip label="Back-marker" on={m.convoyRole === 'sweep'} onPress={() => assignRole(m, 'sweep')} />
+                      <RoleChip label="No role" on={!m.convoyRole} onPress={() => assignRole(m, null)} />
+                    </View>
+                  )}
+                </View>
+              ))}
+            </View>
+          )}
+
+          {convoy && drive.regroupPoints.length > 0 && (
+            <View style={{ gap: 4 }}>
+              <Text style={ui.label}>Regroup points</Text>
+              {drive.regroupPoints.map((p) => (
+                <Text key={p.id} style={ui.muted}>
+                  🚩 {p.name}: {p.reachedBy.length}/{drive.members.length} cars here
+                </Text>
               ))}
             </View>
           )}
@@ -191,7 +286,7 @@ export default function DriveScreen() {
 
           <View style={s.actions}>
             {drive.status !== 'lobby' && (
-              <Button title={premium ? 'Pit stop photo' : 'Pit stop photo ★'} icon="📸" variant={premium ? 'secondary' : 'premium'} style={{ flex: 1 }} onPress={pitStop} />
+              <Button title="Pit stop photo" icon="📸" variant="secondary" style={{ flex: 1 }} onPress={pitStop} />
             )}
             {isHost && drive.status === 'lobby' && <Button title="Start drive" style={{ flex: 1 }} loading={busy} onPress={() => run(start)} />}
             {isHost && drive.status === 'driving' && drive.members.length > 1 && (
@@ -222,6 +317,14 @@ function GuidanceBanner({ step, distanceToStepM, offRouteM }: { step: Drive['rou
       <Text style={s.bannerText}>{step.instruction}</Text>
       {offRouteM > OFF_ROUTE_M && <Text style={s.offRoute}>{"You're off the planned route - head back to the orange line."}</Text>}
     </View>
+  );
+}
+
+function RoleChip({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={[s.roleChip, on && s.roleChipOn]}>
+      <Text style={[s.roleChipText, on && { color: colors.accentText }]}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -263,6 +366,12 @@ const s = StyleSheet.create({
   banner: { backgroundColor: colors.accent, borderRadius: radius.lg, padding: 16, gap: 2 },
   bannerDistance: { color: colors.accentText, fontSize: 28, fontWeight: '900' },
   bannerText: { color: colors.accentText, fontSize: 18, fontWeight: '700' },
+  alert: { backgroundColor: colors.danger, borderRadius: radius.md, padding: 12 },
+  alertText: { color: '#fff', fontSize: 15, fontWeight: '800' },
+  roleRow: { flexDirection: 'row', gap: 8, paddingLeft: 22, paddingBottom: 8 },
+  roleChip: { backgroundColor: colors.cardRaised, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
+  roleChipOn: { backgroundColor: colors.premium },
+  roleChipText: { color: colors.text, fontWeight: '700', fontSize: 13 },
   offRoute: { color: colors.accentText, fontSize: 14, marginTop: 6, fontWeight: '600' },
   sheet: {
     position: 'absolute',

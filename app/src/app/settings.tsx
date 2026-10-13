@@ -14,8 +14,8 @@ export default function SettingsScreen() {
         <Text style={ui.h2}>{premium ? '★ Premium' : 'Free plan'}</Text>
         <Text style={ui.muted}>
           {premium
-            ? 'Pit stop photos and one-tap Instagram & Facebook posting are unlocked.'
-            : 'Upgrade to snap pit stop photos and post them straight to Instagram or Facebook.'}
+            ? 'Club organiser tools are unlocked: events, convoy tools, route library and drive history.'
+            : 'Upgrade to run your car club: events and sign-ups, convoy tools, a route library and drive history.'}
         </Text>
         <Button title={premium ? 'Manage Premium' : 'Get Premium'} variant="premium" onPress={() => router.push('/premium')} />
       </Card>

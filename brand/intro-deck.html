@@ -127,6 +127,7 @@
     <symbol id="i-route" viewBox="0 0 24 24"><g fill="none" stroke="#FF7A1A" stroke-width="2" stroke-linecap="round"><path d="M4 20 C4 13 20 15 20 8"/><circle cx="4" cy="20" r="1.5"/><path d="M20 8 V3 M20 3 h4"/></g></symbol>
     <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z" fill="none" stroke="#FF7A1A" stroke-width="2" stroke-linejoin="round"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="#FF7A1A" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></g></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><g fill="none" stroke="#FF7A1A" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke-linecap="round"/></g></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#1A0D00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-flag" viewBox="0 0 24 24"><g fill="none" stroke="#FF7A1A" stroke-width="2" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h12l-3 4 3 4H5"/></g></symbol>
     <symbol id="i-club" viewBox="0 0 24 24"><g fill="none" stroke="#FF7A1A" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5" stroke-linecap="round"/></g></symbol>
@@ -170,9 +171,9 @@
       <p>Clubs organise convoys through messaging groups and shared pins. Cars split at junctions, someone always takes a wrong turn, and no one knows who has arrived.</p>
     </div>
     <div class="card">
-      <div class="icon-badge"><svg><use href="#i-cam"/></svg></div>
-      <h3>The moment gets lost</h3>
-      <p>Pit-stop photos get posted hours later, if at all, without the story of where the group stopped or how the drive went.</p>
+      <div class="icon-badge"><svg><use href="#i-cal"/></svg></div>
+      <h3>Organising falls on one person</h3>
+      <p>Dates, sign-ups, routes and headcounts end up scattered across chats and spreadsheets. Nobody keeps a record of the good roads or the drives the club has done.</p>
     </div>
   </div>
   <div style="margin-top:auto; margin-bottom:8mm; display:flex; align-items:center; gap:5mm;">
@@ -195,12 +196,12 @@
     <div class="card" style="border-top: 1.2mm solid var(--accent);">
       <div class="icon-badge"><svg><use href="#i-group"/></svg></div>
       <h3>Drive together</h3>
-      <p>Start a group drive and share a code. Everyone sees the group live on the map, and each driver's time from start to finish is recorded automatically.</p>
+      <p>Start a group drive and share a code. Everyone sees the group live on the map, and each driver's time is recorded. Pit stop photos post straight to Instagram or Facebook.</p>
     </div>
     <div class="card" style="border-top: 1.2mm solid var(--gold);">
-      <div class="icon-badge" style="background:rgba(245,196,81,.12)"><svg><use href="#i-cam"/></svg></div>
-      <h3>Share the stop <span class="pill premium" style="margin-left:1.5mm; vertical-align:middle;">PREMIUM</span></h3>
-      <p>Snap a photo at a pit stop. It's stamped with where you are and how the drive is going, ready to post to Instagram or Facebook in one tap.</p>
+      <div class="icon-badge" style="background:rgba(245,196,81,.12)"><svg><use href="#i-cal"/></svg></div>
+      <h3>Run your club <span class="pill premium" style="margin-left:1.5mm; vertical-align:middle;">PREMIUM</span></h3>
+      <p>Club events with sign-ups, convoy tools that keep everyone together, a library of tested routes and a history of every club drive.</p>
     </div>
   </div>
   <div style="margin-top:9mm;">
@@ -264,7 +265,7 @@
         <li><span class="dot"><svg><use href="#i-check"/></svg></span><p><b>Share the code or invite link.</b> Members join from the meeting point with one tap.</p></li>
         <li><span class="dot"><svg><use href="#i-check"/></svg></span><p><b>Drive together, live.</b> Everyone sees every car on the map and how far each driver has left to go. If someone loses signal, they rejoin automatically.</p></li>
         <li><span class="dot"><svg><use href="#i-check"/></svg></span><p><b>Arrive and compare.</b> The clock starts when the organiser starts the drive and stops for each driver as they reach the destination. Once everyone is in, a results board shows each driver's time.</p></li>
-        <li><span class="dot"><svg><use href="#i-check"/></svg></span><p><b>Solo runs count too.</b> Drive a route alone and your time is still recorded.</p></li>
+        <li><span class="dot"><svg><use href="#i-check"/></svg></span><p><b>Share the stop.</b> Snap a pit stop photo stamped with where you are, and post it to Instagram or Facebook in one tap. Free for everyone.</p></li>
       </ul>
     </div>
     <div class="phone-wrap">
@@ -295,28 +296,30 @@
   <div class="footer"><span class="mini"><img src="icon.svg">B-ROADS</span><span>Group drives</span></div>
 </section>
 
-<!-- 6. PIT STOPS / PREMIUM -->
+<!-- 6. CLUB ORGANISER TOOLS / PREMIUM -->
 <section class="page">
-  <div class="split" style="grid-template-columns: 1fr 1fr;">
+  <div class="split" style="grid-template-columns: 1.05fr .95fr;">
     <div>
       <div class="eyebrow" style="color:var(--gold)">Feature three · Premium</div>
-      <h2>Every pit stop, shared in seconds.</h2>
-      <ul class="steps">
-        <li><span class="dot" style="background:var(--gold)"><svg><use href="#i-check"/></svg></span><p><b>Snap it in the app.</b> No switching between camera, gallery and social apps.</p></li>
-        <li><span class="dot" style="background:var(--gold)"><svg><use href="#i-check"/></svg></span><p><b>Stamped automatically.</b> The photo shows where you've stopped, the drive name and how long you've been on the road.</p></li>
-        <li><span class="dot" style="background:var(--gold)"><svg><use href="#i-check"/></svg></span><p><b>One tap to post.</b> Send it straight to an Instagram Story, an Instagram post or Facebook. A caption with the location is ready to paste.</p></li>
+      <h2>Everything a club organiser needs, in one place.</h2>
+      <ul class="steps" style="gap:3.6mm; margin-top:6mm;">
+        <li><span class="dot" style="background:var(--gold)"><svg><use href="#i-check"/></svg></span><p><b>Club events and sign-ups.</b> Post a drive with a date, meeting point and route. Members reply going, maybe or can&rsquo;t make it, so you know who&rsquo;s coming.</p></li>
+        <li><span class="dot" style="background:var(--gold)"><svg><use href="#i-check"/></svg></span><p><b>Convoy tools.</b> Name a lead car and a back-marker, set regroup points along the route, and get an alert the moment a car falls behind.</p></li>
+        <li><span class="dot" style="background:var(--gold)"><svg><use href="#i-check"/></svg></span><p><b>Route library.</b> Save the club&rsquo;s best tested roads with notes, so anyone can drive them again.</p></li>
+        <li><span class="dot" style="background:var(--gold)"><svg><use href="#i-check"/></svg></span><p><b>Club drive history.</b> Every club drive is logged: the route, who came and how long it took.</p></li>
       </ul>
-      <div class="card" style="margin-top:8mm; padding:0; overflow:hidden;">
-        <table style="width:100%; border-collapse:collapse; font-size:10.5pt;">
+      <div class="card" style="margin-top:6mm; padding:0; overflow:hidden;">
+        <table style="width:100%; border-collapse:collapse; font-size:10pt;">
           <tr style="background:var(--raised);">
-            <th style="text-align:left; padding:3mm 5mm; color:var(--muted); font-weight:700;">What you get</th>
-            <th style="padding:3mm 4mm; color:var(--text);">Free</th>
-            <th style="padding:3mm 4mm; color:var(--gold);">Premium</th>
+            <th style="text-align:left; padding:2.6mm 5mm; color:var(--muted); font-weight:700;">What you get</th>
+            <th style="padding:2.6mm 4mm; color:var(--text);">Free</th>
+            <th style="padding:2.6mm 4mm; color:var(--gold);">Premium</th>
           </tr>
-          <tr><td style="padding:2.6mm 5mm; color:#D0D4DB;">Back-road routing and guidance</td><td style="text-align:center" class="accent">●</td><td style="text-align:center; color:var(--gold)">●</td></tr>
-          <tr style="background:#1C2026"><td style="padding:2.6mm 5mm; color:#D0D4DB;">Live group drives and timing</td><td style="text-align:center" class="accent">●</td><td style="text-align:center; color:var(--gold)">●</td></tr>
-          <tr><td style="padding:2.6mm 5mm; color:#D0D4DB;">Pit stop camera with location stamp</td><td style="text-align:center; color:#4B5260">-</td><td style="text-align:center; color:var(--gold)">●</td></tr>
-          <tr style="background:#1C2026"><td style="padding:2.6mm 5mm; color:#D0D4DB;">One-tap Instagram and Facebook posting</td><td style="text-align:center; color:#4B5260">-</td><td style="text-align:center; color:var(--gold)">●</td></tr>
+          <tr><td style="padding:2.4mm 5mm; color:#D0D4DB;">Back-road routing and guidance</td><td style="text-align:center;" class="accent">●</td><td style="text-align:center; color:var(--gold)">●</td></tr>
+          <tr style="background:#1C2026"><td style="padding:2.4mm 5mm; color:#D0D4DB;">Live group drives</td><td style="text-align:center;" class="accent">●</td><td style="text-align:center; color:var(--gold)">●</td></tr>
+          <tr><td style="padding:2.4mm 5mm; color:#D0D4DB;">Pit stop photos and one-tap sharing</td><td style="text-align:center;" class="accent">●</td><td style="text-align:center; color:var(--gold)">●</td></tr>
+          <tr style="background:#1C2026"><td style="padding:2.4mm 5mm; color:#D0D4DB;">Join clubs and sign up to events</td><td style="text-align:center;" class="accent">●</td><td style="text-align:center; color:var(--gold)">●</td></tr>
+          <tr><td style="padding:2.4mm 5mm; color:#D0D4DB;">Create and run a club with all organiser tools</td><td style="text-align:center; color:#4B5260">-</td><td style="text-align:center; color:var(--gold)">●</td></tr>
         </table>
       </div>
     </div>
@@ -324,43 +327,41 @@
       <div class="glow" style="background: radial-gradient(circle, rgba(245,196,81,.18), transparent 65%);"></div>
       <div class="phone"><div class="screen" style="background:#14161A;">
         <div class="notch"></div>
-        <div style="position:absolute; left:3mm; right:3mm; top:10mm; aspect-ratio: 4/5; border-radius:3mm; overflow:hidden;">
-          <svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style="width:100%; height:100%; display:block;">
-            <defs>
-              <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7A35C"/><stop offset=".55" stop-color="#E9795A"/><stop offset="1" stop-color="#7A4A6B"/></linearGradient>
-            </defs>
-            <rect width="200" height="250" fill="url(#sky)"/>
-            <circle cx="140" cy="80" r="20" fill="#FFE2A8" opacity=".9"/>
-            <path d="M0 140 L40 95 L70 120 L105 80 L150 125 L175 105 L200 120 V250 H0z" fill="#4A3557"/>
-            <path d="M0 165 L30 140 L65 160 L100 130 L140 165 L170 145 L200 160 V250 H0z" fill="#2E2438"/>
-            <path d="M0 172 C60 160 140 178 200 166 V250 H0z" fill="#1E1A24"/>
-            <path d="M0 182 C50 176 90 186 140 170 C160 164 175 160 200 158" stroke="#3A3440" stroke-width="12" fill="none"/>
-            <path d="M0 182 C50 176 90 186 140 170 C160 164 175 160 200 158" stroke="#E8E2D6" stroke-width="1.2" fill="none" stroke-dasharray="5 5"/>
-            <g transform="translate(36 158) scale(1.15)">
-              <rect x="0" y="6" width="44" height="11" rx="4" fill="#C9461A"/>
-              <path d="M7 7 L14 0 H30 L37 7z" fill="#B23C16"/>
-              <path d="M15 1.5 H29 L34 6.5 H10z" fill="#7FB3D5"/>
-              <circle cx="10" cy="17" r="4.5" fill="#111"/><circle cx="34" cy="17" r="4.5" fill="#111"/>
-              <circle cx="10" cy="17" r="2" fill="#777"/><circle cx="34" cy="17" r="2" fill="#777"/>
-            </g>
-          </svg>
-          <div style="position:absolute; left:0; right:0; bottom:0; background:rgba(0,0,0,.62); padding:2.4mm 2.8mm;">
-            <div class="wordmark" style="font-size:8pt;">B<span class="accent">-</span>ROADS</div>
-            <div style="font-size:7.5pt; font-weight:800; margin-top:.4mm;"><svg viewBox="0 0 24 24" style="width:2.6mm;height:2.6mm;vertical-align:-0.4mm;margin-right:.6mm"><path d="M12 22s7-7.2 7-12.5A7 7 0 0 0 5 9.5C5 14.8 12 22 12 22z" fill="#FF5A5F"/><circle cx="12" cy="9.5" r="2.6" fill="#fff"/></svg>Highland Pass Café</div>
-            <div style="font-size:6pt; color:#DDD; margin-top:.3mm;">Sunday Morning Run</div>
+        <div style="position:absolute; left:3mm; right:3mm; top:10mm; display:flex; flex-direction:column; gap:2.2mm;">
+          <div style="font-size:11pt; font-weight:900;">Highland Drivers Club</div>
+          <div class="seg"><span class="on">Events</span><span>Routes</span><span>History</span><span>Members</span></div>
+          <div class="ui-card" style="background:var(--card); display:flex; flex-direction:column; gap:1.3mm;">
+            <div style="font-size:6pt; font-weight:800; color:var(--accent); letter-spacing:.06em;">SUNDAY MORNING</div>
+            <div style="font-size:9pt; font-weight:800;">Breakfast Run</div>
+            <div style="font-size:6.5pt; color:var(--muted);">Meet at Highland Pass Café</div>
+            <div style="font-size:6.5pt; color:var(--muted);">Route: Hill Road Loop</div>
+            <div style="display:flex; align-items:center; gap:1mm; margin-top:.6mm;">
+              <span style="width:4.6mm;height:4.6mm;border-radius:50%;background:#4FC3F7;font-size:5.5pt;font-weight:900;color:#0b2230;display:flex;align-items:center;justify-content:center;">A</span>
+              <span style="width:4.6mm;height:4.6mm;border-radius:50%;background:#F06292;font-size:5.5pt;font-weight:900;color:#300b18;display:flex;align-items:center;justify-content:center;">F</span>
+              <span style="width:4.6mm;height:4.6mm;border-radius:50%;background:#3DDC84;font-size:5.5pt;font-weight:900;color:#062510;display:flex;align-items:center;justify-content:center;">D</span>
+              <span style="width:4.6mm;height:4.6mm;border-radius:50%;background:#FFD54F;font-size:5.5pt;font-weight:900;color:#2b2200;display:flex;align-items:center;justify-content:center;">S</span>
+              <span style="font-size:6pt; color:var(--muted); margin-left:1mm;">are going</span>
+            </div>
+            <div style="display:flex; gap:1.4mm; margin-top:.6mm;">
+              <div class="btn" style="background:var(--good); color:#062510; padding:1.8mm 0;">Going</div>
+              <div class="btn s" style="padding:1.8mm 0;">Maybe</div>
+              <div class="btn s" style="padding:1.8mm 0;">Can&rsquo;t</div>
+            </div>
+            <div class="btn p" style="padding:2mm 0;">Start drive</div>
           </div>
-        </div>
-        <div style="position:absolute; left:3mm; right:3mm; bottom:27mm; font-size:6.5pt; color:var(--good); font-weight:600;">Caption copied. Paste it into your post.</div>
-        <div style="position:absolute; left:3mm; right:3mm; bottom:5mm; display:grid; grid-template-columns:1fr 1fr; gap:2mm;">
-          <div class="btn p" style="background:linear-gradient(90deg,#F58529,#DD2A7B,#8134AF); color:#fff;">Instagram Story</div>
-          <div class="btn p" style="background:linear-gradient(90deg,#DD2A7B,#8134AF); color:#fff;">Instagram Post</div>
-          <div class="btn" style="background:#1877F2; color:#fff;">Facebook</div>
-          <div class="btn s">More…</div>
+          <div style="font-size:6pt; font-weight:800; color:var(--muted); letter-spacing:.08em; margin-top:1mm;">LIVE CLUB DRIVE</div>
+          <div style="background:var(--danger, #FF5A5F); border-radius:2.6mm; padding:2.2mm 2.6mm; font-size:7pt; font-weight:800; color:#fff;">⚠ Farah is falling behind</div>
+          <div class="ui-card" style="background:var(--card); padding:2mm 2.6mm;">
+            <div class="member"><span class="c" style="background:#4FC3F7"></span><span class="n">Aiman</span><span class="pill" style="background:var(--gold); color:#1A0D00; font-size:5pt; padding:.4mm 1.4mm;">LEAD</span></div>
+            <div class="member"><span class="c" style="background:#F06292"></span><span class="n">Farah</span><span class="st" style="color:#FF5A5F; font-weight:700;">Falling behind</span></div>
+            <div class="member"><span class="c" style="background:#3DDC84"></span><span class="n">Daniel</span><span class="pill" style="background:var(--gold); color:#1A0D00; font-size:5pt; padding:.4mm 1.4mm;">BACK</span></div>
+            <div style="font-size:6pt; color:var(--muted); margin-top:.8mm;">Regroup point: Petrol station by the lake</div>
+          </div>
         </div>
       </div></div>
     </div>
   </div>
-  <div class="footer"><span class="mini"><img src="icon.svg">B-ROADS</span><span>Pit stop sharing</span></div>
+  <div class="footer"><span class="mini"><img src="icon.svg">B-ROADS</span><span>Club organiser tools</span></div>
 </section>
 
 <!-- 7. STATUS, ROADMAP, CONTACT -->
@@ -371,7 +372,7 @@
     <div class="card">
       <div class="icon-badge"><svg><use href="#i-flag"/></svg></div>
       <h3>Today</h3>
-      <p>B-Roads is in development for iPhone and Android. The core features are being built now: back-road routing, live timed group drives and pit stop sharing. Road testing with drivers comes next.</p>
+      <p>B-Roads is in development for iPhone and Android. The core features are being built now: back-road routing, live group drives, pit stop sharing and club organiser tools. Road testing with drivers comes next.</p>
     </div>
     <div class="card">
       <div class="icon-badge"><svg><use href="#i-spark"/></svg></div>
@@ -379,7 +380,7 @@
       <ul style="padding-left:4.5mm;">
         <li>Spoken turn-by-turn directions and automatic rerouting</li>
         <li>Tracking that keeps running in the background</li>
-        <li>Club profiles, member lists and drive history</li>
+        <li>A web dashboard for club organisers</li>
         <li>Saved and shared favourite routes</li>
         <li>Partner stops: cafés, workshops and events</li>
       </ul>

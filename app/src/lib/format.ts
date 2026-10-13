@@ -14,6 +14,14 @@ export function formatDuration(ms: number, short = false): string {
   return h ? `${h}h ${mm}m ${String(s).padStart(2, '0')}s` : `${m}m ${String(s).padStart(2, '0')}s`;
 }
 
+/** "Sun 12 Oct, 7:30 am" in the phone's locale. */
+export function formatDateTime(ms: number): string {
+  const d = new Date(ms);
+  const date = d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+  const time = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  return `${date}, ${time}`;
+}
+
 export function scenicLabel(score: number): string {
   if (score >= 75) return 'Epic';
   if (score >= 55) return 'Twisty';

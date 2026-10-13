@@ -59,6 +59,9 @@ export interface MemberPosition extends LatLng {
   updatedAt: number;
 }
 
+/** Convoy roles, available on club drives (Premium). */
+export type ConvoyRole = 'lead' | 'sweep';
+
 export interface DriveMember {
   id: string;
   name: string;
@@ -68,6 +71,21 @@ export interface DriveMember {
   distanceToGoalM?: number;
   /** Epoch ms when the member reached the destination. */
   arrivedAt?: number;
+  convoyRole?: ConvoyRole;
+  /** Metres driven along the planned route. */
+  progressM?: number;
+  /** Club drives: how far this car is behind the front of the convoy. */
+  behindM?: number;
+  /** Club drives: true once the gap to the front is over the alert threshold. */
+  fallingBehind?: boolean;
+}
+
+export interface RegroupPoint {
+  id: string;
+  name: string;
+  location: LatLng;
+  /** Members who have reached it. */
+  reachedBy: string[];
 }
 
 export interface DriveResult {
@@ -91,6 +109,85 @@ export interface Drive {
   finishedAt?: number;
   members: DriveMember[];
   results?: DriveResult[];
+  /** Set on club drives, which unlock the convoy tools. */
+  club?: { id: string; name: string; eventId?: string };
+  regroupPoints: RegroupPoint[];
+}
+
+// ---- Clubs (Premium) ------------------------------------------------------
+
+export type ClubRole = 'owner' | 'organiser' | 'member';
+
+export interface ClubMember {
+  id: string;
+  name: string;
+  role: ClubRole;
+  joinedAt: number;
+}
+
+export interface SavedRoute {
+  id: string;
+  name: string;
+  notes?: string;
+  start: Place;
+  destination: Place;
+  route: ScenicRoute;
+  savedBy: string;
+  createdAt: number;
+}
+
+export type RsvpStatus = 'going' | 'maybe' | 'no';
+
+export interface ClubEvent {
+  id: string;
+  title: string;
+  description?: string;
+  /** Epoch ms when drivers meet. */
+  meetAt: number;
+  meetingPoint: Place;
+  routeId?: string;
+  createdBy: string;
+  rsvps: { memberId: string; name: string; status: RsvpStatus }[];
+  /** Code of the live drive once an organiser starts it. */
+  driveCode?: string;
+}
+
+export interface DriveRecord {
+  driveCode: string;
+  name: string;
+  eventId?: string;
+  startedAt: number;
+  finishedAt: number;
+  start: Place;
+  destination: Place;
+  distanceM: number;
+  /** Start to the last car arriving (or the drive being ended). */
+  groupElapsedMs: number;
+  participants: { name: string; elapsedMs: number | null }[];
+}
+
+/** What members see; secrets such as member tokens never leave the server. */
+export interface Club {
+  id: string;
+  name: string;
+  inviteCode: string;
+  createdAt: number;
+  members: ClubMember[];
+  routes: SavedRoute[];
+  events: ClubEvent[];
+  history: DriveRecord[];
+}
+
+/** Returned when creating or joining a club. Keep the token secret on the device. */
+export interface ClubSession {
+  club: Club;
+  memberId: string;
+  token: string;
+}
+
+export interface ClubAuth {
+  clubId: string;
+  token: string;
 }
 
 // ---- Socket.IO contract -------------------------------------------------
@@ -108,6 +205,8 @@ export interface CreateDrivePayload {
   start: Place;
   destination: Place;
   route: ScenicRoute;
+  /** Makes it a club drive; the caller must be an organiser of that club. */
+  club?: ClubAuth & { eventId?: string };
 }
 
 export interface JoinDrivePayload {
@@ -131,6 +230,10 @@ export interface ClientToServerEvents {
   'drive:end': (ack: Ack<Drive>) => void;
   'drive:leave': () => void;
   'drive:position': (p: PositionPayload) => void;
+  // Club drives only, host only.
+  'drive:setRole': (p: { memberId: string; role: ConvoyRole | null }, ack: Ack<Drive>) => void;
+  'drive:addRegroup': (p: { name: string; location: LatLng }, ack: Ack<Drive>) => void;
+  'drive:removeRegroup': (p: { id: string }, ack: Ack<Drive>) => void;
 }
 
 export interface ServerToClientEvents {

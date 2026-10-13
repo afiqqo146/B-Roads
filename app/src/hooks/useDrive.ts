@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Drive, JoinedDrive } from '../../../shared/types';
+import type { ConvoyRole, Drive, JoinedDrive, LatLng } from '../../../shared/types';
 import { call, getSocket } from '../lib/socket';
 import { keys, load, save } from '../lib/storage';
 import type { Fix } from './useLocation';
@@ -65,6 +65,21 @@ export function useDrive(code: string, driverName: string, fix: Fix | null) {
 
   const start = useCallback(() => call<Drive>((ack) => getSocket().emit('drive:start', ack)).then(setDrive), []);
   const end = useCallback(() => call<Drive>((ack) => getSocket().emit('drive:end', ack)).then(setDrive), []);
+  // Convoy tools: club drives only, host only.
+  const setConvoyRole = useCallback(
+    (memberId: string, role: ConvoyRole | null) =>
+      call<Drive>((ack) => getSocket().emit('drive:setRole', { memberId, role }, ack)).then(setDrive),
+    [],
+  );
+  const addRegroup = useCallback(
+    (name: string, location: LatLng) =>
+      call<Drive>((ack) => getSocket().emit('drive:addRegroup', { name, location }, ack)).then(setDrive),
+    [],
+  );
+  const removeRegroup = useCallback(
+    (id: string) => call<Drive>((ack) => getSocket().emit('drive:removeRegroup', { id }, ack)).then(setDrive),
+    [],
+  );
   const leave = useCallback(() => {
     getSocket().emit('drive:leave');
     memberIdRef.current = null;
@@ -72,5 +87,18 @@ export function useDrive(code: string, driverName: string, fix: Fix | null) {
   }, [code]);
 
   const me = drive?.members.find((m) => m.id === memberId);
-  return { drive, memberId, me, isHost: !!me && drive?.hostId === me.id, connected, error, start, end, leave };
+  return {
+    drive,
+    memberId,
+    me,
+    isHost: !!me && drive?.hostId === me.id,
+    connected,
+    error,
+    start,
+    end,
+    leave,
+    setConvoyRole,
+    addRegroup,
+    removeRegroup,
+  };
 }

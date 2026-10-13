@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { CreateDrivePayload } from '../../shared/types.ts';
-import { DRIVE_TTL_MS, DriveError, DriveStore } from '../src/drives.ts';
+import type { CreateOptions } from '../src/drives.ts';
+import { CONVOY_GAP_M, DRIVE_TTL_MS, DriveError, DriveStore } from '../src/drives.ts';
 import { rankRoutes } from '../src/scenic.ts';
 import { trip, twistyPath } from './fixtures.ts';
 
 const destination = { name: 'Bukit Tinggi', location: { lat: 3.4, lng: 101.8 } };
-const payload: CreateDrivePayload = {
+const payload: CreateOptions = {
   name: 'Sunday run',
   memberName: 'Aiman',
   start: { name: 'Home', location: { lat: 3.1, lng: 101.6 } },
@@ -121,5 +121,68 @@ describe('DriveStore', () => {
     t += DRIVE_TTL_MS + 1;
     expect(store.sweep()).toBe(1);
     expect(store.get('ABC234')).toBeUndefined();
+  });
+
+  describe('convoy tools (club drives)', () => {
+    const club = { id: 'c1', name: 'Klang Valley Drivers' };
+    const path = payload.route.path;
+
+    it('are not available on ordinary drives', () => {
+      store.create(payload);
+      expect(() => store.addRegroupPoint('ABC234', 'm1', 'Cafe', path[10])).toThrow(/club drives/);
+    });
+
+    it('lets the host assign one lead and one sweep', () => {
+      store.create({ ...payload, club });
+      const farah = store.join('ABC234', 'Farah').memberId;
+      const dan = store.join('ABC234', 'Dan').memberId;
+      expect(() => store.setConvoyRole('ABC234', farah, dan, 'lead')).toThrow(/host/);
+      store.setConvoyRole('ABC234', 'm1', farah, 'lead');
+      let drive = store.setConvoyRole('ABC234', 'm1', dan, 'lead');
+      expect(drive.members.map((m) => m.convoyRole)).toEqual([undefined, undefined, 'lead']);
+      drive = store.setConvoyRole('ABC234', 'm1', farah, 'sweep');
+      expect(drive.members.map((m) => m.convoyRole)).toEqual([undefined, 'sweep', 'lead']);
+      drive = store.setConvoyRole('ABC234', 'm1', dan, null);
+      expect(drive.members[2].convoyRole).toBeUndefined();
+    });
+
+    it('flags cars that fall behind the lead car', () => {
+      store.create({ ...payload, club });
+      const farah = store.join('ABC234', 'Farah').memberId;
+      store.setConvoyRole('ABC234', 'm1', 'm1', 'lead');
+      store.start('ABC234', 'm1');
+
+      store.updatePosition('ABC234', farah, path[2]);
+      let drive = store.updatePosition('ABC234', 'm1', path[path.length - 3]);
+      const [lead, behind] = drive.members;
+      expect(lead.behindM).toBe(0);
+      expect(behind.behindM).toBeGreaterThan(CONVOY_GAP_M);
+      expect(behind.fallingBehind).toBe(true);
+
+      drive = store.updatePosition('ABC234', farah, path[path.length - 4]);
+      expect(drive.members[1].fallingBehind).toBe(false);
+    });
+
+    it('ticks off regroup points as cars reach them', () => {
+      store.create({ ...payload, club });
+      const farah = store.join('ABC234', 'Farah').memberId;
+      let drive = store.addRegroupPoint('ABC234', 'm1', '  Petrol station ', path[20]);
+      const point = drive.regroupPoints[0];
+      expect(point.name).toBe('Petrol station');
+      store.start('ABC234', 'm1');
+      drive = store.updatePosition('ABC234', farah, path[20]);
+      expect(drive.regroupPoints[0].reachedBy).toEqual([farah]);
+      drive = store.removeRegroupPoint('ABC234', 'm1', point.id);
+      expect(drive.regroupPoints).toEqual([]);
+    });
+
+    it('reports finished drives', () => {
+      const finished: string[] = [];
+      store = new DriveStore({ now: () => t, newId: () => `m${++ids}`, newCode: () => 'ABC234', onFinish: (d) => finished.push(d.code) });
+      store.create({ ...payload, club });
+      store.start('ABC234', 'm1');
+      store.updatePosition('ABC234', 'm1', nearGoal);
+      expect(finished).toEqual(['ABC234']);
+    });
   });
 });
