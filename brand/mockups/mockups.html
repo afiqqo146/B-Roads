@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>B-Roads app mockups</title>
+<style>
+  :root {
+    --bg: #14161A; --card: #1E2127; --raised: #272B33; --border: #343944;
+    --text: #F4F5F7; --muted: #9AA1AD; --accent: #FF7A1A; --ink: #1A0D00;
+    --good: #3DDC84; --danger: #FF5A5F; --gold: #F5C451;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0B0C0E; font-family: 'Inter', sans-serif; color: var(--text); display: flex; flex-wrap: wrap; gap: 20px; padding: 20px; }
+
+  /* One App Store style shot: caption on top, phone below */
+  .shot {
+    width: 540px; height: 1080px; position: relative; overflow: hidden; flex: none;
+    background: radial-gradient(120% 70% at 50% 0%, #2B1B0F 0%, #14161A 55%, #101114 100%);
+  }
+  .caption { position: absolute; top: 58px; left: 0; right: 0; text-align: center; padding: 0 40px; }
+  .caption .eyebrow { color: var(--accent); font-weight: 800; font-size: 15px; letter-spacing: .18em; text-transform: uppercase; }
+  .caption h1 { font-family: 'Inter Display', 'Inter'; font-size: 40px; font-weight: 800; line-height: 1.08; margin-top: 10px; letter-spacing: -.01em; }
+  .caption p { color: #B9BFC9; font-size: 18px; margin-top: 10px; line-height: 1.35; }
+  .caption .pro { color: var(--gold); }
+
+  .phone {
+    position: absolute; left: 50%; transform: translateX(-50%); top: 236px;
+    width: 390px; height: 820px; border-radius: 58px; background: #050506; padding: 12px;
+    box-shadow: 0 40px 90px rgba(0,0,0,.6), inset 0 0 0 2px #2E3239;
+  }
+  .screen { position: relative; width: 100%; height: 100%; border-radius: 47px; overflow: hidden; background: var(--bg); }
+  .island { position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 112px; height: 32px; border-radius: 18px; background: #000; z-index: 20; }
+  .status { position: absolute; top: 15px; left: 34px; right: 30px; display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; z-index: 19; }
+  .status .icons { display: flex; gap: 5px; align-items: center; }
+  .map { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  /* App UI pieces (mirroring app/src/components/ui.tsx and screens) */
+  .brandrow { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; }
+  .brand { font-family: 'Inter Display', 'Inter'; font-weight: 900; font-size: 23px; letter-spacing: 1px; text-shadow: 0 0 6px #000; }
+  .brand span { color: var(--accent); }
+  .chips { display: flex; gap: 6px; }
+  .chip { background: var(--card); border-radius: 999px; padding: 7px 12px; font-weight: 700; font-size: 13px; white-space: nowrap; }
+  .panel { background: var(--card); border-radius: 20px; padding: 10px; display: flex; flex-direction: column; gap: 7px; }
+  .field { background: var(--raised); border-radius: 8px; padding: 11px 12px; font-size: 15px; display: flex; gap: 10px; align-items: center; }
+  .seg { display: flex; background: var(--raised); border-radius: 8px; padding: 3px; }
+  .seg span { flex: 1; text-align: center; padding: 7px 0; border-radius: 6px; color: var(--muted); font-weight: 700; font-size: 13.5px; }
+  .seg .on { background: var(--accent); color: var(--ink); }
+  .btn { min-height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; padding: 0 14px; text-align: center; }
+  .btn.p { background: var(--accent); color: var(--ink); }
+  .btn.s { background: var(--raised); color: var(--text); }
+  .btn.d { background: var(--danger); color: var(--ink); }
+  .btn.g { background: var(--gold); color: var(--ink); }
+  .row { display: flex; gap: 9px; }
+  .row > * { flex: 1; }
+  .label { color: var(--muted); font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+  .muted { color: var(--muted); font-size: 13.5px; line-height: 1.4; }
+  .body { font-size: 15px; line-height: 1.4; }
+  .h2 { font-size: 19px; font-weight: 700; }
+  .card { background: var(--card); border-radius: 20px; padding: 14px; display: flex; flex-direction: column; gap: 9px; }
+
+  .rc { width: 178px; flex: none; background: var(--card); border-radius: 14px; padding: 12px; border: 2px solid transparent; display: flex; flex-direction: column; gap: 3px; }
+  .rc.sel { border-color: var(--accent); }
+  .rc .t { color: var(--accent); font-weight: 800; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+  .rc .badge { background: var(--accent); color: var(--ink); font-size: 9.5px; font-weight: 800; padding: 2px 5px; border-radius: 4px; }
+  .rc .score { font-size: 28px; font-weight: 800; }
+  .rc .score small { color: var(--muted); font-size: 13px; font-weight: 600; }
+  .rc .st { font-size: 14px; font-weight: 600; }
+  .rc .sm { color: var(--muted); font-size: 11.5px; }
+
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--bg); border-radius: 22px 22px 0 0; padding: 16px 16px 30px; display: flex; flex-direction: column; gap: 11px; z-index: 5; }
+  .member { display: flex; align-items: center; gap: 9px; padding: 5px 0; }
+  .member .dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+  .member .n { flex: 1; font-weight: 600; font-size: 14.5px; }
+  .member .s { color: var(--muted); font-size: 13.5px; font-variant-numeric: tabular-nums; }
+  .rb { background: var(--gold); color: var(--ink); font-size: 9.5px; font-weight: 900; padding: 2px 6px; border-radius: 4px; }
+  .stats { display: flex; gap: 8px; }
+  .stats > div { flex: 1; }
+  .stats .v { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .banner { background: var(--accent); color: var(--ink); border-radius: 20px; padding: 14px 16px; }
+  .banner .d { font-size: 27px; font-weight: 900; }
+  .banner .i { font-size: 17px; font-weight: 700; margin-top: 2px; }
+  .alert { background: var(--danger); color: #fff; border-radius: 14px; padding: 11px 13px; font-weight: 800; font-size: 14px; }
+  .topbar { position: absolute; top: 58px; left: 12px; right: 12px; display: flex; flex-direction: column; gap: 8px; z-index: 6; }
+  .navbar { position: absolute; top: 0; left: 0; right: 0; height: 104px; padding: 58px 18px 0; display: flex; align-items: center; gap: 12px; background: var(--bg); z-index: 6; }
+  .navbar .back { color: var(--accent); font-size: 26px; font-weight: 400; line-height: 1; }
+  .navbar .title { font-weight: 700; font-size: 17px; flex: 1; text-align: center; margin-right: 26px; }
+  .content { position: absolute; top: 104px; left: 0; right: 0; bottom: 0; padding: 4px 14px 30px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+  .tabs { display: flex; background: var(--card); border-radius: 8px; padding: 3px; }
+  .tabs span { flex: 1; text-align: center; padding: 8px 0; border-radius: 6px; color: var(--muted); font-weight: 700; font-size: 12.5px; }
+  .tabs .on { background: var(--accent); color: var(--ink); }
+  .rsvp { display: flex; gap: 7px; }
+  .rsvp span { flex: 1; text-align: center; padding: 9px 0; border-radius: 8px; background: var(--raised); font-weight: 700; font-size: 14px; }
+  .rsvp .on { background: var(--good); color: #062510; }
+  .date { color: var(--accent); font-weight: 800; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+  .homebar { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 130px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.55); z-index: 30; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- Dark map background shared by the map screens -->
+    <symbol id="land" viewBox="0 0 376 836" preserveAspectRatio="xMidYMid slice">
+      <rect width="376" height="836" fill="#1A1D22"/>
+      <path d="M-20 520 C60 480 120 560 210 530 C280 505 330 560 400 540 V700 C300 690 200 720 100 690 C40 672 0 690 -20 700z" fill="#18262F"/>
+      <ellipse cx="90" cy="250" rx="70" ry="44" fill="#1E2A23"/>
+      <ellipse cx="300" cy="380" rx="60" ry="40" fill="#1E2A23"/>
+      <ellipse cx="250" cy="150" rx="50" ry="30" fill="#1E2A23"/>
+      <ellipse cx="120" cy="760" rx="80" ry="40" fill="#1E2A23"/>
+      <path d="M-10 180 C80 200 170 140 400 170" stroke="#2A2F37" stroke-width="5" fill="none"/>
+      <path d="M-10 430 C110 410 230 460 400 430" stroke="#2A2F37" stroke-width="5" fill="none"/>
+      <path d="M60 -10 C80 200 40 450 90 850" stroke="#2A2F37" stroke-width="4" fill="none"/>
+      <path d="M330 -10 C320 240 360 520 320 850" stroke="#353B45" stroke-width="11" fill="none"/>
+      <path d="M330 -10 C320 240 360 520 320 850" stroke="#454D5A" stroke-width="2" stroke-dasharray="8 8" fill="none"/>
+      <path d="M-10 760 C120 730 220 790 400 750" stroke="#2A2F37" stroke-width="4" fill="none"/>
+      <path d="M200 -10 C190 80 230 110 215 200" stroke="#262A31" stroke-width="3" fill="none"/>
+      <path d="M150 600 C170 640 140 700 170 850" stroke="#262A31" stroke-width="3" fill="none"/>
+    </symbol>
+    <!-- Twisty B-road route and a duller alternative -->
+    <symbol id="routes" viewBox="0 0 376 836" preserveAspectRatio="xMidYMid slice">
+      <path d="M110 740 C200 700 330 640 320 520 C310 400 300 300 250 200 C220 140 200 120 190 90" stroke="#6B7280" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <path d="M110 740 C50 700 170 670 140 620 C110 570 220 560 200 500 C180 445 70 460 90 400 C110 340 230 370 220 300 C210 240 120 260 140 200 C155 155 210 150 190 90"
+            stroke="#FF7A1A" stroke-width="8" stroke-linecap="round" fill="none"/>
+      <circle cx="110" cy="740" r="9" fill="#3DDC84" stroke="#14161A" stroke-width="4"/>
+      <path d="M190 90 v-30" stroke="#F4F5F7" stroke-width="3"/>
+      <path d="M190 60 h22 l-6 7 l6 7 h-22z" fill="#F4F5F7"/>
+    </symbol>
+    <symbol id="i-signal" viewBox="0 0 18 12"><g fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></g></symbol>
+    <symbol id="i-batt" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3" fill="none" stroke="#fff" opacity=".5"/><rect x="2" y="2" width="16" height="8" rx="1.5" fill="#fff"/><rect x="23.5" y="4" width="2" height="4" rx="1" fill="#fff" opacity=".5"/></symbol>
+  </defs>
+</svg>
+
+<!-- ===== 1. PLAN A ROUTE ===== -->
+<section class="shot" id="s1">
+  <div class="caption">
+    <div class="eyebrow">Find the back roads</div>
+    <h1>Routes rated for fun, not speed</h1>
+    <p>Motorways and tolls avoided. Every option scored for corners.</p>
+  </div>
+  <div class="phone"><div class="screen">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span class="icons"><svg width="18" height="12"><use href="#i-signal"/></svg><svg width="26" height="12"><use href="#i-batt"/></svg></span></div>
+    <svg class="map"><use href="#land"/></svg>
+    <svg class="map"><use href="#routes"/></svg>
+    <div class="topbar">
+      <div class="brandrow">
+        <div class="brand">B<span>-</span>ROADS</div>
+        <div class="chips"><span class="chip">Join drive</span><span class="chip">Club</span><span class="chip">☰</span></div>
+      </div>
+      <div class="panel">
+        <div class="field"><span>🟢</span>My location</div>
+        <div class="field"><span>🏁</span>Highland Pass Café</div>
+        <div class="seg"><span>Relaxed</span><span>Balanced</span><span class="on">Wild</span></div>
+      </div>
+    </div>
+    <div style="position:absolute; left:0; right:0; bottom:28px; display:flex; flex-direction:column; gap:9px; z-index:5;">
+      <div style="display:flex; gap:9px; padding-left:14px; overflow:hidden;">
+        <div class="rc sel">
+          <div class="t">EPIC <span class="badge">MOST FUN</span></div>
+          <div class="score">84<small>/100</small></div>
+          <div class="st">48 km · 1h 05m</div>
+          <div class="sm">104°/km of corners · 100% back roads</div>
+        </div>
+        <div class="rc">
+          <div class="t">SCENIC</div>
+          <div class="score">58<small>/100</small></div>
+          <div class="st">44 km · 52 min</div>
+          <div class="sm">61°/km of corners · 8% big roads</div>
+        </div>
+      </div>
+      <div style="padding:0 14px;"><div class="btn s">🗺️&nbsp; Save to Highland Drivers Club</div></div>
+      <div class="row" style="padding:0 14px;"><div class="btn s">Drive solo</div><div class="btn p">Group drive</div></div>
+    </div>
+    <div class="homebar"></div>
+  </div></div>
+</section>
+
+<!-- ===== 2. LOBBY ===== -->
+<section class="shot" id="s2">
+  <div class="caption">
+    <div class="eyebrow">Gather the group</div>
+    <h1>Share a code. Everyone's in.</h1>
+    <p>Club drives add a lead car, a back-marker and regroup points.</p>
+  </div>
+  <div class="phone"><div class="screen">
+    <div class="island"></div>
+    <div class="status"><span>7:24</span><span class="icons"><svg width="18" height="12"><use href="#i-signal"/></svg><svg width="26" height="12"><use href="#i-batt"/></svg></span></div>
+    <svg class="map"><use href="#land"/></svg>
+    <svg class="map"><use href="#routes"/></svg>
+    <svg class="map" viewBox="0 0 376 836" preserveAspectRatio="xMidYMid slice">
+      <g transform="translate(212 300)"><path d="M0 0 v-26" stroke="#F5C451" stroke-width="3"/><path d="M0 -26 h18 l-5 6 l5 6 h-18z" fill="#F5C451"/></g>
+    </svg>
+    <div class="topbar">
+      <div class="row" style="flex:none;"><span class="chip" style="flex:none; padding:9px 14px;">✕</span><span class="chip" style="padding:9px 14px;">Sunday Morning Run</span></div>
+    </div>
+    <div class="sheet">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div><div class="label">Drive code</div><div style="font-size:32px; font-weight:900; letter-spacing:6px;">K7PX4Q</div></div>
+        <div class="btn s" style="padding:0 20px;">Invite</div>
+      </div>
+      <div class="muted">Start when everyone is at the meeting point.</div>
+      <div class="muted" style="color:var(--gold);">Convoy tools: tap a driver to make them lead car or back-marker. Long-press the map to add regroup points.</div>
+      <div>
+        <div class="member"><span class="dot" style="background:#FF7A1A"></span><span class="n">Afiq (you) · host</span><span class="rb">LEAD</span><span class="s">Ready</span></div>
+        <div class="member"><span class="dot" style="background:#4FC3F7"></span><span class="n">Aiman</span><span class="s">Ready</span></div>
+        <div class="member"><span class="dot" style="background:#3DDC84"></span><span class="n">Farah</span><span class="s">Ready</span></div>
+        <div style="display:flex; gap:7px; padding:2px 0 6px 20px;">
+          <span class="chip" style="background:var(--raised); font-size:12.5px;">Lead car</span>
+          <span class="chip" style="background:var(--gold); color:var(--ink); font-size:12.5px;">Back-marker</span>
+          <span class="chip" style="background:var(--raised); font-size:12.5px;">No role</span>
+        </div>
+        <div class="member"><span class="dot" style="background:#F06292"></span><span class="n">Daniel</span><span class="rb">BACK</span><span class="s">Ready</span></div>
+      </div>
+      <div class="btn p">Start drive</div>
+    </div>
+    <div class="homebar"></div>
+  </div></div>
+</section>
+
+<!-- ===== 3. LIVE DRIVE ===== -->
+<section class="shot" id="s3">
+  <div class="caption">
+    <div class="eyebrow">Drive together, live</div>
+    <h1>Turn-by-turn, with convoy alerts</h1>
+    <p>See every car. Know the moment someone drops back.</p>
+  </div>
+  <div class="phone"><div class="screen">
+    <div class="island"></div>
+    <div class="status"><span>8:02</span><span class="icons"><svg width="18" height="12"><use href="#i-signal"/></svg><svg width="26" height="12"><use href="#i-batt"/></svg></span></div>
+    <svg class="map" viewBox="0 0 376 836" preserveAspectRatio="xMidYMid slice">
+      <rect width="376" height="836" fill="#1A1D22"/>
+      <ellipse cx="80" cy="330" rx="90" ry="60" fill="#1E2A23"/>
+      <ellipse cx="310" cy="200" rx="70" ry="50" fill="#1E2A23"/>
+      <path d="M-10 250 C100 270 220 220 400 240" stroke="#2A2F37" stroke-width="6" fill="none"/>
+      <path d="M300 -10 C290 200 340 400 300 850" stroke="#353B45" stroke-width="12" fill="none"/>
+      <path d="M150 850 C120 700 300 640 250 520 C200 400 60 420 100 300 C130 210 260 230 230 120 C215 60 160 40 170 -10"
+            stroke="#FF7A1A" stroke-width="12" stroke-linecap="round" fill="none"/>
+      <circle cx="232" cy="470" r="11" fill="#FF7A1A" stroke="#fff" stroke-width="4"/>
+      <circle cx="148" cy="402" r="10" fill="#4FC3F7" stroke="#14161A" stroke-width="4"/>
+      <circle cx="226" cy="565" r="10" fill="#F06292" stroke="#14161A" stroke-width="4"/>
+      <g transform="translate(108 300)"><path d="M0 0 v-28" stroke="#F5C451" stroke-width="3"/><path d="M0 -28 h20 l-6 7 l6 7 h-20z" fill="#F5C451"/></g>
+      <circle cx="196" cy="782" r="10" fill="#3DDC84" stroke="#14161A" stroke-width="4"/>
+    </svg>
+    <div class="topbar">
+      <div class="row" style="flex:none;"><span class="chip" style="flex:none; padding:9px 14px;">✕</span><span class="chip" style="padding:9px 14px;">Sunday Morning Run</span></div>
+      <div class="banner"><div class="d">450 m</div><div class="i">Turn left onto Hill Road</div></div>
+      <div class="alert">⚠ Daniel (2.4 km) is falling behind</div>
+    </div>
+    <div class="sheet">
+      <div class="stats">
+        <div><div class="label">Elapsed</div><div class="v">38m 12s</div></div>
+        <div><div class="label">To go</div><div class="v">21 km</div></div>
+        <div><div class="label">Arrived</div><div class="v">0/4</div></div>
+      </div>
+      <div>
+        <div class="member"><span class="dot" style="background:#FF7A1A"></span><span class="n">Afiq (you) · host</span><span class="rb">LEAD</span><span class="s">21 km to go</span></div>
+        <div class="member"><span class="dot" style="background:#4FC3F7"></span><span class="n">Aiman</span><span class="s">21 km to go</span></div>
+        <div class="member"><span class="dot" style="background:#3DDC84"></span><span class="n">Daniel</span><span class="rb">BACK</span><span class="s" style="color:var(--danger)">Falling behind · 2.4 km</span></div>
+        <div class="member"><span class="dot" style="background:#F06292"></span><span class="n">Farah</span><span class="s">22 km to go</span></div>
+      </div>
+      <div class="muted">🚩 Regroup 1: 3/4 cars here</div>
+      <div class="row"><div class="btn s">📸&nbsp; Pit stop photo</div><div class="btn d" style="flex:none; padding:0 18px;">End for all</div></div>
+    </div>
+    <div class="homebar"></div>
+  </div></div>
+</section>
+
+<!-- ===== 4. DRIVE COMPLETE ===== -->
+<section class="shot" id="s4">
+  <div class="caption">
+    <div class="eyebrow">Arrive together</div>
+    <h1>A shared drive, not a race</h1>
+    <p>The group's time and everyone's own time. No leaderboard.</p>
+  </div>
+  <div class="phone"><div class="screen">
+    <div class="island"></div>
+    <div class="status"><span>8:31</span><span class="icons"><svg width="18" height="12"><use href="#i-signal"/></svg><svg width="26" height="12"><use href="#i-batt"/></svg></span></div>
+    <svg class="map"><use href="#land"/></svg>
+    <svg class="map"><use href="#routes"/></svg>
+    <div class="topbar">
+      <div class="row" style="flex:none;"><span class="chip" style="flex:none; padding:9px 14px;">✕</span><span class="chip" style="padding:9px 14px;">Sunday Morning Run</span></div>
+    </div>
+    <div class="sheet" style="gap:13px;">
+      <div class="stats">
+        <div><div class="label">Drive time</div><div class="v">1h 04m</div></div>
+        <div><div class="label">To go</div><div class="v">Arrived</div></div>
+        <div><div class="label">Arrived</div><div class="v">4/4</div></div>
+      </div>
+      <div class="h2">🏁 Drive complete</div>
+      <div class="body">Group time: 1h 12m 30s</div>
+      <div>
+        <div class="member" style="padding:7px 0;"><span class="n" style="color:var(--accent); font-weight:700; font-size:15.5px;">Afiq (you)</span><span class="s" style="color:var(--text); font-weight:700; font-size:15px;">1h 04m 51s</span></div>
+        <div class="member" style="padding:7px 0;"><span class="n" style="font-weight:700; font-size:15.5px;">Aiman</span><span class="s" style="color:var(--text); font-weight:700; font-size:15px;">1h 03m 40s</span></div>
+        <div class="member" style="padding:7px 0;"><span class="n" style="font-weight:700; font-size:15.5px;">Daniel</span><span class="s" style="color:var(--text); font-weight:700; font-size:15px;">1h 12m 30s</span></div>
+        <div class="member" style="padding:7px 0;"><span class="n" style="font-weight:700; font-size:15.5px;">Farah</span><span class="s" style="color:var(--text); font-weight:700; font-size:15px;">1h 09m 05s</span></div>
+      </div>
+      <div class="muted">Start → Highland Pass Café · 48 km</div>
+      <div class="row"><div class="btn s">📸&nbsp; Pit stop photo</div><div class="btn p">Done</div></div>
+    </div>
+    <div class="homebar"></div>
+  </div></div>
+</section>
+
+<!-- ===== 5. PIT STOP PHOTO ===== -->
+<section class="shot" id="s5">
+  <div class="caption">
+    <div class="eyebrow">Share the stop</div>
+    <h1>One tap to Instagram</h1>
+    <p>Photos stamped with where you are and how the drive's going.</p>
+  </div>
+  <div class="phone"><div class="screen">
+    <div class="island"></div>
+    <div class="status"><span>8:46</span><span class="icons"><svg width="18" height="12"><use href="#i-signal"/></svg><svg width="26" height="12"><use href="#i-batt"/></svg></span></div>
+    <div style="position:absolute; top:60px; left:14px; right:14px; display:flex; flex-direction:column; gap:12px;">
+      <div style="position:relative; width:100%; aspect-ratio:4/5; border-radius:14px; overflow:hidden;">
+        <svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style="width:100%; height:100%; display:block;">
+          <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7A35C"/><stop offset=".55" stop-color="#E9795A"/><stop offset="1" stop-color="#7A4A6B"/></linearGradient></defs>
+          <rect width="200" height="250" fill="url(#sky)"/>
+          <circle cx="140" cy="70" r="20" fill="#FFE2A8" opacity=".9"/>
+          <path d="M0 130 L40 85 L70 110 L105 70 L150 115 L175 95 L200 110 V250 H0z" fill="#4A3557"/>
+          <path d="M0 155 L30 130 L65 150 L100 120 L140 155 L170 135 L200 150 V250 H0z" fill="#2E2438"/>
+          <path d="M0 165 C60 152 140 170 200 158 V250 H0z" fill="#1E1A24"/>
+          <path d="M0 176 C50 170 90 180 140 164 C160 158 175 154 200 152" stroke="#3A3440" stroke-width="12" fill="none"/>
+          <path d="M0 176 C50 170 90 180 140 164 C160 158 175 154 200 152" stroke="#E8E2D6" stroke-width="1.2" fill="none" stroke-dasharray="5 5"/>
+          <g transform="translate(34 150) scale(1.2)">
+            <rect x="0" y="6" width="44" height="11" rx="4" fill="#C9461A"/>
+            <path d="M7 7 L14 0 H30 L37 7z" fill="#B23C16"/>
+            <path d="M15 1.5 H29 L34 6.5 H10z" fill="#7FB3D5"/>
+            <circle cx="10" cy="17" r="4.5" fill="#111"/><circle cx="34" cy="17" r="4.5" fill="#111"/>
+            <circle cx="10" cy="17" r="2" fill="#777"/><circle cx="34" cy="17" r="2" fill="#777"/>
+          </g>
+        </svg>
+        <div style="position:absolute; left:0; right:0; bottom:0; background:rgba(0,0,0,.66); padding:12px 14px;">
+          <div class="brand" style="font-size:16px; text-shadow:none;">B<span>-</span>ROADS</div>
+          <div style="font-size:16px; font-weight:700; margin-top:2px;">📍 Highland Pass Café</div>
+          <div style="font-size:12.5px; color:#ddd; margin-top:1px;">Sunday Morning Run · 38 min in · 21 km to go</div>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:9px;">
+        <div class="btn" style="background:linear-gradient(90deg,#F58529,#DD2A7B,#8134AF); color:#fff;">Instagram Story</div>
+        <div class="btn" style="background:linear-gradient(90deg,#DD2A7B,#8134AF); color:#fff;">Instagram Post</div>
+        <div class="btn" style="background:#1877F2; color:#fff;">Facebook</div>
+        <div class="btn s">More…</div>
+      </div>
+      <div class="muted" style="color:var(--good);">Caption copied. Paste it into your post.</div>
+      <div class="row"><div class="btn s">Retake</div><div class="btn s">Save</div><div class="btn s" style="font-size:13.5px;">Back to drive</div></div>
+    </div>
+    <div class="homebar"></div>
+  </div></div>
+</section>
+
+<!-- ===== 6. CLUB EVENTS ===== -->
+<section class="shot" id="s6">
+  <div class="caption">
+    <div class="eyebrow pro">Premium · Run your club</div>
+    <h1>Events and sign-ups</h1>
+    <p>Post the drive. See who's coming. Start it on the day.</p>
+  </div>
+  <div class="phone"><div class="screen">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span class="icons"><svg width="18" height="12"><use href="#i-signal"/></svg><svg width="26" height="12"><use href="#i-batt"/></svg></span></div>
+    <div class="navbar"><span class="back">‹</span><span class="title">My club</span></div>
+    <div class="content">
+      <div class="card">
+        <div style="font-family:'Inter Display','Inter'; font-size:25px; font-weight:800;">Highland Drivers Club</div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div><div class="label">Invite code</div><div style="font-size:24px; font-weight:900; letter-spacing:5px;">HDC7Q2</div></div>
+          <div class="btn s" style="padding:0 18px;">Invite</div>
+        </div>
+      </div>
+      <div class="tabs"><span class="on">Events</span><span>Routes</span><span>History</span><span>Members</span></div>
+      <div class="btn p">📅&nbsp; New event</div>
+      <div class="card">
+        <div class="date">Sun 19 Oct, 7:30 am</div>
+        <div class="h2">Breakfast Run</div>
+        <div class="muted">📍 Meet at Highland Pass Café</div>
+        <div class="muted">🗺️ Hill Road Loop · 48 km</div>
+        <div class="body" style="font-size:14px;">Fuel up before. Breakfast stop at the top.</div>
+        <div class="muted">4 going · 1 maybe: Afiq, Aiman, Farah, Daniel</div>
+        <div class="rsvp"><span class="on">Going</span><span>Maybe</span><span>Can't</span></div>
+        <div class="row"><div class="btn p">Start drive</div><div class="btn s" style="flex:none;">Delete</div></div>
+      </div>
+      <div class="card">
+        <div class="date">Sat 1 Nov, 6:45 am</div>
+        <div class="h2">Sunrise Coast Cruise</div>
+        <div class="muted">📍 Meet at Harbour Petrol Station</div>
+      </div>
+    </div>
+    <div class="homebar"></div>
+  </div></div>
+</section>
+
+<!-- ===== 7. ROUTE LIBRARY ===== -->
+<section class="shot" id="s7">
+  <div class="caption">
+    <div class="eyebrow pro">Premium · Route library</div>
+    <h1>Your club's best roads</h1>
+    <p>Tested routes with notes, ready to drive again.</p>
+  </div>
+  <div class="phone"><div class="screen">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span class="icons"><svg width="18" height="12"><use href="#i-signal"/></svg><svg width="26" height="12"><use href="#i-batt"/></svg></span></div>
+    <div class="navbar"><span class="back">‹</span><span class="title">My club</span></div>
+    <div class="content">
+      <div class="tabs"><span>Events</span><span class="on">Routes</span><span>History</span><span>Members</span></div>
+      <div class="muted">To add a route, plan it on the map and tap "Save to club".</div>
+      <div class="card">
+        <svg viewBox="0 0 376 160" style="width:100%; height:120px; border-radius:12px; display:block;" preserveAspectRatio="xMidYMid slice">
+          <rect width="376" height="160" fill="#1A1D22"/>
+          <ellipse cx="90" cy="60" rx="70" ry="40" fill="#1E2A23"/>
+          <path d="M20 140 C60 100 100 150 140 110 C180 70 120 40 180 30 C240 20 230 100 290 90 C330 82 330 40 360 30" stroke="#FF7A1A" stroke-width="6" stroke-linecap="round" fill="none"/>
+          <circle cx="20" cy="140" r="6" fill="#3DDC84"/><circle cx="360" cy="30" r="6" fill="#F4F5F7"/>
+        </svg>
+        <div class="h2">Hill Road Loop</div>
+        <div class="muted">Start → Highland Pass Café · 48 km · about 1h 05m</div>
+        <div class="body" style="font-size:14px;">Best before 8am. Watch for gravel after the old bridge.</div>
+        <div class="muted" style="font-size:12px;">Saved by Afiq</div>
+        <div class="row"><div class="btn p">Drive it</div><div class="btn s" style="flex:none;">Delete</div></div>
+      </div>
+      <div class="card">
+        <svg viewBox="0 0 376 160" style="width:100%; height:120px; border-radius:12px; display:block;" preserveAspectRatio="xMidYMid slice">
+          <rect width="376" height="160" fill="#1A1D22"/>
+          <path d="M-10 120 C80 100 200 140 400 110 V170 H-10z" fill="#18262F"/>
+          <path d="M20 40 C90 60 120 30 180 60 C240 90 280 60 360 80" stroke="#FF7A1A" stroke-width="6" stroke-linecap="round" fill="none"/>
+          <circle cx="20" cy="40" r="6" fill="#3DDC84"/><circle cx="360" cy="80" r="6" fill="#F4F5F7"/>
+        </svg>
+        <div class="h2">Lakeside Lanes</div>
+        <div class="muted">Marina → Tea Estate · 62 km · about 1h 20m</div>
+      </div>
+    </div>
+    <div class="homebar"></div>
+  </div></div>
+</section>
+
+</body>
+</html>
